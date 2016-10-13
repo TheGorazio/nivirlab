@@ -5,6 +5,9 @@
   <title>
     Jopa
   </title>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="http://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://amondit.github.io/jquery.scrollsteps.js/jquery.scrollsteps-full-min.js"></script>
   <script type="text/javascript" src="bundle.js"></script>
 </head>
 <body>
@@ -29,12 +32,14 @@
   		<div class="info col-md-5 col-xs-12">
   			<div class="labs">
   				<select id="selectLab" class="form-control">
-  			        <option selected value="Lab_1">Лабораторная работа №1. Закон Ома.</option>
+                <option selected value="Lab_0">test</option>
+  			        <option value="Lab_1">Лабораторная работа №1. Закон Ома.</option>
   			        <option value="Lab_2">Лабораторная работа №2. Параллельное соединение проводников.</option>
         			</select>
   			</div>
   			<div class="data">
   				<button id="sendBtn" class="btn btn-primary">Send</button>
+          <button id="resetBtn" class="btn btn-danger">Reset</button>
   			</div>
   			<div class="table"></div>
   		</div>
