@@ -70,24 +70,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (page.innerHTML === "Virtual Lab") {
 	      (function () {
 	        var App = __webpack_require__(5);
-	        var labs = __webpack_require__(14);
+	        var labs = __webpack_require__(15);
 	        var app = new App();
 	
 	        var labSelector = document.getElementById("selectLab");
 	        var labId = labSelector.value;
 	        var data = labs[labId];
 	
+	        var labDoc = document.getElementById("labDoc");
+	        labDoc.innerHTML = labs[labId].doc;
+	
 	        labSelector.addEventListener("change", function (e) {
 	          console.log(e.target.value);
 	          data = labs[e.target.value];
-	          app.update(data);
+	          labDoc.innerHTML = data.doc;
+	          app.update(data.stand);
 	        });
-	        app.start(data);
+	        app.start(data.stand);
 	
 	        /* buttons */
 	        var resetBtn = document.getElementById("resetBtn");
 	        resetBtn.addEventListener("click", function (e) {
-	          app.update(data);
+	          app.update(data.stand);
 	        });
 	
 	        var sendBtn = document.getElementById("sendBtn");
@@ -146,7 +150,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, "#stand {\r\n\tborder: 1px solid #333;\r\n\tdisplay: inline-block;\r\n\theight: 80vh;\r\n\tmargin-bottom: 25px;\r\n}\r\n\r\n.info {\r\n\r\n}\r\n\r\n.info #selectLab {\r\n\tfont-size: 0.85em !important;\r\n\tpadding: 5px\r\n}\r\n\r\n.data {\r\n\tmargin-top: 10px;\r\n\tmargin-bottom: 10px;\r\n}\r\n\r\n#main.hide {\r\n\tdisplay: none;\r\n\tmax-height: 0;\r\n}\r\n#preloader.active {\r\n\tposition: fixed;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\theight: 100vh;\r\n\twidth: 100vw;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tposition: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 67px;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 6px;\r\n\tbackground: black;\r\n\topacity: .2;\r\n\tborder-radius: 50%;\r\n\tanimation: shadow .5s linear infinite;\r\n}\r\n#preloader.active #inner:after {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tbackground: white;\r\n\tanimation: rotate .5s linear infinite;\r\n\tborder-radius: 5px;\r\n}\r\n@keyframes rotate {\r\n\t0% {\r\n\t\ttransform: translateY(0) rotate(0deg);\r\n\t}\r\n\t25% {\r\n\t\t transform: translateY(10px) rotate(22.5deg);\r\n\t}\r\n\t50% {\r\n\t\t transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n\t\t border-bottom-right-radius: 50px;\r\n\t}\r\n\t75% {\r\n\t\t transform: translateY(10px) rotate(67.5deg);\r\n\t}\r\n\t100% {\r\n\t\t transform: translateY(0) rotate(90deg);\r\n\t}\r\n}\r\n\r\n@keyframes shadow {\r\n\t0%, 100% {transform: scaleX(1);}\r\n\t50% {transform: scaleX(1.2);}\r\n}\r\n", ""]);
+	exports.push([module.id, "#stand {\r\n\tborder: 1px solid #333;\r\n\tdisplay: inline-block;\r\n\theight: 80vh;\r\n\tmargin-bottom: 25px;\r\n}\r\n\r\n.info {\r\n\r\n}\r\n\r\n.info #selectLab {\r\n\tfont-size: 0.85em !important;\r\n\tpadding: 5px\r\n}\r\n\r\n.data {\r\n\tmargin-top: 10px;\r\n\tmargin-bottom: 10px;\r\n}\r\n\r\n#labDoc {\r\n\tpadding: 10px;\r\n\tborder: 1px solid rgba(1,1,12,0.20);\r\n\tborder-radius: 5px;\r\n\tmargin-bottom: 10px;\r\n}\r\n#main.hide {\r\n\tdisplay: none;\r\n\tmax-height: 0;\r\n}\r\n#preloader.active {\r\n\tposition: fixed;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\theight: 100vh;\r\n\twidth: 100vw;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tposition: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 67px;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 6px;\r\n\tbackground: black;\r\n\topacity: .2;\r\n\tborder-radius: 50%;\r\n\tanimation: shadow .5s linear infinite;\r\n}\r\n#preloader.active #inner:after {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tbackground: white;\r\n\tanimation: rotate .5s linear infinite;\r\n\tborder-radius: 5px;\r\n}\r\n@keyframes rotate {\r\n\t0% {\r\n\t\ttransform: translateY(0) rotate(0deg);\r\n\t}\r\n\t25% {\r\n\t\t transform: translateY(10px) rotate(22.5deg);\r\n\t}\r\n\t50% {\r\n\t\t transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n\t\t border-bottom-right-radius: 50px;\r\n\t}\r\n\t75% {\r\n\t\t transform: translateY(10px) rotate(67.5deg);\r\n\t}\r\n\t100% {\r\n\t\t transform: translateY(0) rotate(90deg);\r\n\t}\r\n}\r\n\r\n@keyframes shadow {\r\n\t0%, 100% {transform: scaleX(1);}\r\n\t50% {transform: scaleX(1.2);}\r\n}\r\n", ""]);
 	
 	// exports
 
@@ -531,7 +535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Resister = _interopRequire(__webpack_require__(13));
 	
-	var Picker = _interopRequire(__webpack_require__(15));
+	var Picker = _interopRequire(__webpack_require__(14));
 	
 	var Stand = (function (_Stage) {
 	  function Stand() {
@@ -17556,98 +17560,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 14 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	var labs = {
-	  Lab_0: [{
-	    type: "Picker",
-	    x: 400,
-	    y: 300,
-	    data: ["0", "10", "50", "100"]
-	  }, {
-	    type: "Meter",
-	    x: 80,
-	    y: 50,
-	    param: "A"
-	  }, {
-	    type: "Meter",
-	    x: 200,
-	    y: 50,
-	    param: "A"
-	  }, {
-	    type: "Meter",
-	    x: 320,
-	    y: 50,
-	    param: "V"
-	  }, {
-	    type: "Meter",
-	    x: 440,
-	    y: 50,
-	    param: "V"
-	  }, {
-	    type: "Resister",
-	    x: 80,
-	    y: 150,
-	    value: "10"
-	  }, {
-	    type: "Resister",
-	    x: 80,
-	    y: 200,
-	    value: "100"
-	  }, {
-	    type: "Resister",
-	    x: 80,
-	    y: 250,
-	    value: "1000"
-	  }],
-	  Lab_1: [{
-	    type: "Input",
-	    x: "250",
-	    y: "50"
-	  }, {
-	    type: "Input",
-	    x: "150",
-	    y: "150"
-	  }, {
-	    type: "Input",
-	    x: "50",
-	    y: "250"
-	  }, {
-	    type: "Meter",
-	    param: "A",
-	    x: "300",
-	    y: "300"
-	  }, {
-	    type: "Meter",
-	    param: "V",
-	    x: "100",
-	    y: "300"
-	  }, {
-	    type: "Resister",
-	    value: "200",
-	    x: "100",
-	    y: "400"
-	  }],
-	  Lab_2: [{
-	    type: "Input",
-	    x: "250",
-	    y: "250"
-	  }, {
-	    type: "Input",
-	    x: "150",
-	    y: "150"
-	  }, {
-	    type: "Input",
-	    x: "50",
-	    y: "50"
-	  }] };
-	
-	module.exports = labs;
-
-/***/ },
-/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -17820,6 +17732,92 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	module.exports = Picker;
 	1;
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var labs = {
+	  Lab_1: {
+	    doc: "\n    <h2> Лабораторная работа №1 </h2>\n    <p> Суть этой работы в том, что ты шлюха...</p>",
+	    stand: [{
+	      type: "Picker",
+	      x: 400,
+	      y: 300,
+	      data: ["0", "10", "50", "100"]
+	    }, {
+	      type: "Meter",
+	      x: 80,
+	      y: 50,
+	      param: "A"
+	    }, {
+	      type: "Meter",
+	      x: 200,
+	      y: 50,
+	      param: "A"
+	    }, {
+	      type: "Meter",
+	      x: 320,
+	      y: 50,
+	      param: "V"
+	    }, {
+	      type: "Meter",
+	      x: 440,
+	      y: 50,
+	      param: "V"
+	    }, {
+	      type: "Resister",
+	      x: 80,
+	      y: 150,
+	      value: "10"
+	    }, {
+	      type: "Resister",
+	      x: 80,
+	      y: 200,
+	      value: "100"
+	    }, {
+	      type: "Resister",
+	      x: 80,
+	      y: 250,
+	      value: "1000"
+	    }]
+	  },
+	  Lab_2: {
+	    doc: "\n    <h2> Лабораторная работа №2 </h2>\n    <p> Суть этой работы в том, что ты ебаное очко...</p>",
+	    stand: [{
+	      type: "Input",
+	      x: "250",
+	      y: "50"
+	    }, {
+	      type: "Input",
+	      x: "150",
+	      y: "150"
+	    }, {
+	      type: "Input",
+	      x: "50",
+	      y: "250"
+	    }, {
+	      type: "Meter",
+	      param: "A",
+	      x: "300",
+	      y: "300"
+	    }, {
+	      type: "Meter",
+	      param: "V",
+	      x: "100",
+	      y: "300"
+	    }, {
+	      type: "Resister",
+	      value: "200",
+	      x: "100",
+	      y: "400"
+	    }]
+	  }
+	};
+	
+	module.exports = labs;
 
 /***/ }
 /******/ ])
