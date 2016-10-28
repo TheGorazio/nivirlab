@@ -78,12 +78,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var data = labs[labId];
 	
 	        var labDoc = document.getElementById("labDoc");
-	        labDoc.innerHTML = labs[labId].doc;
+	        /*labDoc.innerHTML = labs[labId].doc;*/
 	
 	        labSelector.addEventListener("change", function (e) {
 	          console.log(e.target.value);
 	          data = labs[e.target.value];
-	          labDoc.innerHTML = data.doc;
+	          /*labDoc.innerHTML = data.doc;*/
 	          app.update(data.stand);
 	        });
 	        app.start(data.stand);
