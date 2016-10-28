@@ -78,12 +78,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var data = labs[labId];
 	
 	        var labDoc = document.getElementById("labDoc");
-	        /*labDoc.innerHTML = labs[labId].doc;*/
-	
+	        labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[labId].doc + "\"/>";
+	        var labPdf = document.getElementById("labPdf");
+	        labDoc.style.height = labPdf.clientHeight;
+	        labDoc.style.width = labPdf.clientWidth;
+	        console.log(labPdf);
 	        labSelector.addEventListener("change", function (e) {
 	          console.log(e.target.value);
 	          data = labs[e.target.value];
-	          /*labDoc.innerHTML = data.doc;*/
+	          labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + data.doc + "\"/>";
 	          app.update(data.stand);
 	        });
 	        app.start(data.stand);
@@ -150,7 +153,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, "#stand {\r\n\tborder: 1px solid #333;\r\n\tdisplay: inline-block;\r\n\theight: 80vh;\r\n\tmargin-bottom: 25px;\r\n}\r\n\r\n.info {\r\n\r\n}\r\n\r\n.info #selectLab {\r\n\tfont-size: 0.85em !important;\r\n\tpadding: 5px\r\n}\r\n\r\n.data {\r\n\tmargin-top: 10px;\r\n\tmargin-bottom: 10px;\r\n}\r\n\r\n#labDoc {\r\n\tpadding: 10px;\r\n\tborder: 1px solid rgba(1,1,12,0.20);\r\n\tborder-radius: 5px;\r\n\tmargin-bottom: 10px;\r\n}\r\n#main.hide {\r\n\tdisplay: none;\r\n\tmax-height: 0;\r\n}\r\n#preloader.active {\r\n\tposition: fixed;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\theight: 100vh;\r\n\twidth: 100vw;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tposition: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 67px;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 6px;\r\n\tbackground: black;\r\n\topacity: .2;\r\n\tborder-radius: 50%;\r\n\tanimation: shadow .5s linear infinite;\r\n}\r\n#preloader.active #inner:after {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tbackground: white;\r\n\tanimation: rotate .5s linear infinite;\r\n\tborder-radius: 5px;\r\n}\r\n@keyframes rotate {\r\n\t0% {\r\n\t\ttransform: translateY(0) rotate(0deg);\r\n\t}\r\n\t25% {\r\n\t\t transform: translateY(10px) rotate(22.5deg);\r\n\t}\r\n\t50% {\r\n\t\t transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n\t\t border-bottom-right-radius: 50px;\r\n\t}\r\n\t75% {\r\n\t\t transform: translateY(10px) rotate(67.5deg);\r\n\t}\r\n\t100% {\r\n\t\t transform: translateY(0) rotate(90deg);\r\n\t}\r\n}\r\n\r\n@keyframes shadow {\r\n\t0%, 100% {transform: scaleX(1);}\r\n\t50% {transform: scaleX(1.2);}\r\n}\r\n", ""]);
+	exports.push([module.id, "#stand {\r\n\tborder: 1px solid #333;\r\n\tdisplay: inline-block;\r\n\theight: 80vh;\r\n\tmargin-bottom: 25px;\r\n}\r\n\r\n.info {\r\n\r\n}\r\n\r\n.info #selectLab {\r\n\tfont-size: 0.85em !important;\r\n\tpadding: 5px\r\n}\r\n\r\n.data {\r\n\tmargin-top: 10px;\r\n\tmargin-bottom: 10px;\r\n}\r\n\r\n.pdf {\r\n\twidth: 100%;\r\n\theight: 400px;\r\n}\r\n#labDoc {\r\n\tpadding: 10px;\r\n\tborder: 1px solid rgba(1,1,12,0.20);\r\n\tborder-radius: 5px;\r\n\tmargin-bottom: 10px;\r\n}\r\n#main.hide {\r\n\tdisplay: none;\r\n\tmax-height: 0;\r\n}\r\n#preloader.active {\r\n\tposition: fixed;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\theight: 100vh;\r\n\twidth: 100vw;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tposition: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 67px;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 6px;\r\n\tbackground: black;\r\n\topacity: .2;\r\n\tborder-radius: 50%;\r\n\tanimation: shadow .5s linear infinite;\r\n}\r\n#preloader.active #inner:after {\r\n\tcontent: '';\r\n  position: absolute;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tbackground: white;\r\n\tanimation: rotate .5s linear infinite;\r\n\tborder-radius: 5px;\r\n}\r\n@keyframes rotate {\r\n\t0% {\r\n\t\ttransform: translateY(0) rotate(0deg);\r\n\t}\r\n\t25% {\r\n\t\t transform: translateY(10px) rotate(22.5deg);\r\n\t}\r\n\t50% {\r\n\t\t transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n\t\t border-bottom-right-radius: 50px;\r\n\t}\r\n\t75% {\r\n\t\t transform: translateY(10px) rotate(67.5deg);\r\n\t}\r\n\t100% {\r\n\t\t transform: translateY(0) rotate(90deg);\r\n\t}\r\n}\r\n\r\n@keyframes shadow {\r\n\t0%, 100% {transform: scaleX(1);}\r\n\t50% {transform: scaleX(1.2);}\r\n}\r\n", ""]);
 	
 	// exports
 
@@ -17741,7 +17744,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var labs = {
 	  Lab_1: {
-	    doc: "\n    <h2> Лабораторная работа №1 </h2>\n    <p> Суть этой работы в том, что ты шлюха...</p>",
+	    doc: "http://yanko.lib.ru/books/philosoph/mgu-ist_filosofii-2005-8l.pdf",
 	    stand: [{
 	      type: "Picker",
 	      x: 400,
@@ -17785,7 +17788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }]
 	  },
 	  Lab_2: {
-	    doc: "\n    <h2> Лабораторная работа №2 </h2>\n    <p> Суть этой работы в том, что ты ебаное очко...</p>",
+	    doc: "http://www.en2.ru/download/bonk.pdf",
 	    stand: [{
 	      type: "Input",
 	      x: "250",
