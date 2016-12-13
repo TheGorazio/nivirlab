@@ -1,55 +1,69 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8">
-  <title>
-    Jopa
-  </title>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="http://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="https://amondit.github.io/jquery.scrollsteps.js/jquery.scrollsteps-full-min.js"></script>
-  <script type="text/javascript" src="bundle.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.5">
+    <title>
+        Virtual Lab
+    </title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://amondit.github.io/jquery.scrollsteps.js/jquery.scrollsteps-full-min.js"></script>
+    <script type="text/javascript" src="bundle.js"></script>
 </head>
+
 <body>
-  <div id="main" class="hide">
-  <nav class="navbar navbar-default">
-  		<div class="container">
-  			<ul class="nav navbar-nav">
-  				<li><a href="pages/science.html">Science</a></li>
-  				<li><a href="pages/engineering.html">Engineering</a></li>
-  				<li><a href="pages/programming.html">Programming</a></li>
-  				<li><a href="pages/creative.html">Creative</a></li>
-  				<li><a href="pages/social.html">Social Significance</a></li>
-  				<li><a id="activePage" href="pages/lab.html">Virtual Lab</a></li>
-  				<li><a href="pages/about.html">About</a></li>
-  			</ul>
-  		</div>
-  	</nav>
-
-  	<div class="container-fluid">
-  		<div class="stand col-md-7 col-xs-12" id="stand">
-  		</div>
-  		<div class="info col-md-5 col-xs-12">
-  			<div class="labs">
-  				<select id="selectLab" class="form-control">
-  			        <option selected value="Lab_1">Лабораторная работа №1. Закон Ома.</option>
-  			        <option value="Lab_2">Лабораторная работа №2. Параллельное соединение проводников.</option>
-        			</select>
-  			</div>
-  			<div class="data">
-          <div id="labDoc">
-          </div>
-  				<button id="sendBtn" class="btn btn-primary">Send</button>
-          <button id="resetBtn" class="btn btn-danger">Reset</button>
-  			</div>
-  			<div class="table"></div>
-  		</div>
-  	</div>
-  </div>
-    <div id="preloader" class="active">
-      <div id="inner"></div>
+    <div id="saveDialog" class="dialog hide">
+        <form id="saveForm">
+            <div class="form-group">
+                <p name="error" class="error"></p>
+                <label for="user">Введите имя, для сохранения лаборатории</label>
+                <input type="text" name="user" placeholder="Username" class="form-control"/>
+                <button type="submit" class="btn btn-success" id="saveDialogBtn">Save</button>
+                <a title="Закрыть" id="closesaveBtn" class="close">X</a>
+            </div>
+        </form>
     </div>
-
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <div id="loadDialog" class="dialog hide">
+        <form id="loadForm">
+            <div class="form-group">
+                <p name="error" class="error"></p>
+                <label for="user">Введите имя, для загрузки лаборатории</label>
+                <input type="text" name="user" placeholder="Username" class="form-control"/>
+                <button type="submit" class="btn btn-warning" id="loadDialogBtn">Load</button>
+                <a title="Закрыть" id="closeloadBtn" class="close">X</a>
+            </div>
+        </form>
+    </div>
+    <div id="main">
+        <div class="container">
+            <div class="row">
+                <div class="stand col-md-7 col-xs-12" id="stand"></div>
+                <div class="info col-md-5 col-xs-12">
+                    <div class="labs">
+                        <select id="selectLab" class="form-control">
+                            <option selected value="Lab_1">Лабораторная работа №1. Закон Ома.</option>
+                            <option value="Lab_2">Лабораторная работа №2. Параллельное соединение проводников.</option>
+                        </select>
+                    </div>
+                    <div class="data">
+                        <div id="labDoc"></div>
+                        <div id="buttons">
+                            <button id="sendBtn" class="btn btn-primary">Send</button>
+                            <button id="saveBtn" class="btn btn-success">Save</button>
+                            <button id="loadBtn" class="btn btn-warning">Import</button>
+                            <button id="resetBtn" class="btn btn-danger">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="preloader" class="">
+        <div id="inner"></div>
+    </div>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </body>
+
 </html>
