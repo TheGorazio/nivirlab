@@ -98,7 +98,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        var sendBtn = document.getElementById("sendBtn");
 	        var instance = axios.create({
-	            baseURL: "https://localhost:3000"
+	            baseURL: "https://virlab.herokuapp.com"
 	        });
 	
 	        sendBtn.addEventListener("click", function () {
