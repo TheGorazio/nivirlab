@@ -117,7 +117,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        var saveBtn = document.getElementById("saveBtn");
 	        saveBtn.addEventListener("click", function (e) {
-	            showModal("save");
+	            showModal("save", app._getStandArray());
 	        });
 	        var loadBtn = document.getElementById("loadBtn");
 	        loadBtn.addEventListener("click", function (e) {
@@ -127,6 +127,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	function showModal(type) {
+	    var stand = arguments[1] === undefined ? null : arguments[1];
+	
 	    var dialog = document.getElementById("" + type + "Dialog");
 	    dialog.className = "dialog";
 	    dialog.scrollIntoView();
@@ -137,6 +139,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var submitBtn = document.getElementById("" + type + "DialogBtn");
 	    var listener = type === "save" ? saveListener : loadListener;
 	    listener.form = form;
+	    if (stand !== null) listener.stand = stand;
+	
 	    submitBtn.addEventListener("click", listener);
 	    var close = document.getElementById("close" + type + "Btn");
 	    close.addEventListener("click", function (e) {
@@ -152,6 +156,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.form.children[0].children[0].innerHTML = "Введите имя";
 	    } else {
 	        console.log("Saving...");
+	        axios.create({
+	            baseURL: "http://localhost:3000"
+	        }).post("/save", {
+	            data: this.stand
+	        }).then(function (res) {
+	            return res.json();
+	        }).then(function (res) {
+	            console.log(res);
+	        })["catch"](function (err) {
+	            console.error(err);
+	        });
 	    }
 	}
 	
@@ -2405,9 +2420,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var arrayToParse = this.components.filter(function (element) {
 	                    return (element.type === "Input" && element.owner === null || element.type !== "Input") && element.type;
 	                });
-	                console.log(arrayToParse);
 	                return arrayToParse.map(function (element) {
-	                    console.log(element._id);
 	                    var el = {};
 	                    switch (element.type) {
 	                        case "Input":
