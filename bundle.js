@@ -157,7 +157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	        console.log("Saving...");
 	        axios.create({
-	            baseURL: "http://localhost:3000"
+	            baseURL: "https://localhost:3000"
 	        }).post("/save", {
 	            data: this.stand
 	        }).then(function (res) {
