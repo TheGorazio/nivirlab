@@ -19171,6 +19171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Rect = _konva.Rect;
 	var Label = _konva.Label;
 	var Text = _konva.Text;
+	var Line = _konva.Line;
 	
 	var Input = _interopRequire(__webpack_require__(36));
 	
@@ -19209,7 +19210,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            padding: 2,
 	            fill: "black"
 	        }));
-	        this.stand.addElements([this.inputOne, this.inputTwo, this.display]);
+	        this.lineToI_1 = new Line({
+	            points: [parseInt(this.x), parseInt(this.y) + 6.25, parseInt(this.x) - 6, parseInt(this.y) + 6.25],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
+	        this.lineToI_2 = new Line({
+	            points: [parseInt(this.x) + 25, parseInt(this.y) + 6.25, parseInt(this.x) + 31, parseInt(this.y) + 6.25],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
+	        this.stand.addElements([this.inputOne, this.inputTwo, this.display, this.lineToI_1, this.lineToI_2]);
 	        /* handlers */
 	    }
 	
@@ -19253,6 +19264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Rect = _konva.Rect;
 	var Label = _konva.Label;
 	var Text = _konva.Text;
+	var Line = _konva.Line;
 	
 	var Input = _interopRequire(__webpack_require__(36));
 	
@@ -19280,6 +19292,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._id = Math.floor(Math.random() * 1000);
 	        this.inputOne = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
 	        this.inputTwo = new Input(this.x + 50, parseInt(this.y) + 6.25, this.stand, this);
+	        this.lineToI_1 = new Line({
+	            points: [parseInt(this.x), parseInt(this.y) + 6.25, parseInt(this.x) - 6, parseInt(this.y) + 6.25],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
+	        this.lineToI_2 = new Line({
+	            points: [parseInt(this.x) + 40, parseInt(this.y) + 6.25, parseInt(this.x) + 46, parseInt(this.y) + 6.25],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
 	        this.display = new Label({
 	            x: this.x,
 	            y: this.y });
@@ -19291,7 +19313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            padding: 2,
 	            fill: "black"
 	        }));
-	        this.stand.addElements([this.inputOne, this.inputTwo, this.display]);
+	        this.stand.addElements([this.inputOne, this.inputTwo, this.display, this.lineToI_1, this.lineToI_2]);
 	        /* handlers */
 	    }
 	
@@ -19308,6 +19330,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
 	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -19323,6 +19347,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Rect = _konva.Rect;
 	var Label = _konva.Label;
 	var Text = _konva.Text;
+	
+	var Input = _interopRequire(__webpack_require__(36));
 	
 	var Picker = (function (_Circle) {
 	    function Picker(x, y, data, param, stand) {
@@ -19376,7 +19402,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.updateState();
 	        this._id = Math.floor(Math.random() * 1000);
 	
-	        this.stand.addElements([this.pointer, this.background, this.display]);
+	        this.inputOne = new Input(this.x - 30, parseInt(this.y) - 5, this.stand, this);
+	        this.inputTwo = new Input(this.x + 30, parseInt(this.y) - 5, this.stand, this);
+	        this.lineToI_1 = new Line({
+	            points: [parseInt(this.x) - 20, parseInt(this.y) - 5, parseInt(this.x) - 26, parseInt(this.y) - 5],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
+	        this.lineToI_2 = new Line({
+	            points: [parseInt(this.x) + 20, parseInt(this.y) - 5, parseInt(this.x) + 26, parseInt(this.y) - 5],
+	            stroke: "black",
+	            strokeWidth: 1
+	        });
+	
+	        this.stand.addElements([this.pointer, this.background, this.display, this.inputOne, this.inputTwo, this.lineToI_1, this.lineToI_2]);
 	
 	        /* handlers */
 	        this.on("click", this.clickHandler.bind(this));
