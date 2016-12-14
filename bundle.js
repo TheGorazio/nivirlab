@@ -58,7 +58,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	__webpack_require__(1);
 	var axios = __webpack_require__(5);
-	var main = undefined;
+	var main = undefined,
+	    app = undefined;
 	
 	window.onload = function () {
 	    setTimeout(function () {
@@ -69,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        var App = __webpack_require__(31);
 	        var labs = __webpack_require__(41);
-	        var app = new App();
+	        app = new App();
 	
 	        var labSelector = document.getElementById("selectLab");
 	        var labId = labSelector.value;
@@ -117,9 +118,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        var saveBtn = document.getElementById("saveBtn");
 	        saveBtn.addEventListener("click", function (e) {
-	            showModal("save", app._getStandArray());
+	            showModal("save");
 	        });
 	        var loadBtn = document.getElementById("loadBtn");
+	        loadBtn.addEventListener("click", function (e) {
+	            showModal("load");
+	        });
+	        var importBtn = document.getElementById("importBtn");
+	        saveBtn.addEventListener("click", function (e) {
+	            showModal("save");
+	        });
+	        var exportBtn = document.getElementById("exportBtn");
 	        loadBtn.addEventListener("click", function (e) {
 	            showModal("load");
 	        });
@@ -127,8 +136,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	function showModal(type) {
-	    var stand = arguments[1] === undefined ? null : arguments[1];
-	
 	    var dialog = document.getElementById("" + type + "Dialog");
 	    dialog.className = "dialog";
 	    dialog.scrollIntoView();
@@ -139,8 +146,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var submitBtn = document.getElementById("" + type + "DialogBtn");
 	    var listener = type === "save" ? saveListener : loadListener;
 	    listener.form = form;
-	    if (stand !== null) listener.stand = stand;
-	
 	    submitBtn.addEventListener("click", listener);
 	    var close = document.getElementById("close" + type + "Btn");
 	    close.addEventListener("click", function (e) {
@@ -156,11 +161,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.form.children[0].children[0].innerHTML = "Введите имя";
 	    } else {
 	        console.log("Saving...");
+	        console.log(app._getStandArray());
 	        axios.create({
 	            baseURL: "https://virlab.herokuapp.com"
 	        }).post("/save", {
 	            user: this.form.children[0].children[2].value,
-	            stand: this.stand
+	            stand: app._getStandArray()
 	        }).then(function (res) {
 	            console.log(res);
 	        })["catch"](function (err) {
@@ -222,7 +228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, "body {\r\n    padding-top: 25px;\r\n}\r\n\r\n#stand {\r\n    border: 1px solid #ccc;\r\n    border-radius: 4px;\r\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n    display: inline-block;\r\n    height: 80vh;\r\n    margin-bottom: 25px;\r\n    height: 550px;\r\n}\r\n\r\n.info #selectLab {\r\n    font-size: 0.85em !important;\r\n    padding: 5px;\r\n}\r\n\r\n.labs {\r\n    height: 50px;\r\n}\r\n\r\n.data {\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    height: 50px;\r\n}\r\n\r\n.pdf {\r\n    width: 100%;\r\n    height: 450px;\r\n    \r\n    z-index: 1;\r\n}\r\n#buttons {\r\n    height: 50px;\r\n}\r\n\r\n#labDoc {\r\n    padding: 10px;\r\n    border: 1px solid rgba(1, 1, 12, 0.20);\r\n    border-radius: 5px;\r\n    margin-bottom: 10px;\r\n    z-index: 1;\r\n}\r\n#main {\r\n    z-index: 1;\r\n    \r\n}\r\n#main.inDialog {\r\n    pointer-events: none;\r\n}\r\n.hide {\r\n    display: none;\r\n    max-height: 0;\r\n}\r\n\r\n.dialog {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    z-index: 10000;\r\n    height: 100%;\r\n    width: 100%;\r\n    background: rgba(12,12,12,0.5);\r\n\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n\r\n    pointer-events: none;\r\n}\r\nform {\r\n    pointer-events: auto;\r\n    z-index: 10001;\r\n    background: white;\r\n    width: 270px;\r\n    height: 180px;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    text-align: center;\r\n    border-radius: 5px;\r\n}\r\n\r\nform input[type=\"text\"] {\r\n    margin: 0 auto;\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    width: 150px;\r\n}\r\n\r\nform .error {\r\n    color: red;\r\n}\r\n.form-group { \r\n    position: relative;\r\n}\r\n.close {\r\n    line-height: 20px;\r\n    position: absolute;\r\n    right: 0;\r\n    top: -5px;\r\n    text-align: center;\r\n    width: 20px;\r\n    text-decoration: none;\r\n    font-weight: bold;\r\n    box-shadow: 1px 1px 3px rgba(0,0,0,0.75);\r\n}\r\n\r\n#preloader.active {\r\n    position: fixed;\r\n    top: 0;\r\n    left: 0;\r\n    height: 100vh;\r\n    width: 100vw;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n    width: 50px;\r\n    height: 50px;\r\n    position: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n    content: '';\r\n    position: absolute;\r\n    top: 67px;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 6px;\r\n    background: black;\r\n    opacity: .2;\r\n    border-radius: 50%;\r\n    animation: shadow .5s linear infinite;\r\n}\r\n\r\n#preloader.active #inner:after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 50px;\r\n    background: white;\r\n    animation: rotate .5s linear infinite;\r\n    border-radius: 5px;\r\n}\r\n\r\n@keyframes rotate {\r\n    0% {\r\n        transform: translateY(0) rotate(0deg);\r\n    }\r\n    25% {\r\n        transform: translateY(10px) rotate(22.5deg);\r\n    }\r\n    50% {\r\n        transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n        border-bottom-right-radius: 50px;\r\n    }\r\n    75% {\r\n        transform: translateY(10px) rotate(67.5deg);\r\n    }\r\n    100% {\r\n        transform: translateY(0) rotate(90deg);\r\n    }\r\n}\r\n\r\n@keyframes shadow {\r\n    0%,\r\n    100% {\r\n        transform: scaleX(1);\r\n    }\r\n    50% {\r\n        transform: scaleX(1.2);\r\n    }\r\n}", ""]);
+	exports.push([module.id, "body {\r\n    padding-top: 25px;\r\n}\r\n\r\n#stand {\r\n    border: 1px solid #ccc;\r\n    border-radius: 4px;\r\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n    display: inline-block;\r\n    height: 80vh;\r\n    margin-bottom: 25px;\r\n    height: 550px;\r\n}\r\n\r\n.info #selectLab {\r\n    font-size: 0.85em !important;\r\n    padding: 5px;\r\n}\r\n\r\n.labs {\r\n    height: 50px;\r\n}\r\n\r\n.data {\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    height: 50px;\r\n}\r\n\r\n.pdf {\r\n    width: 100%;\r\n    height: 450px;\r\n    \r\n    z-index: 1;\r\n}\r\n#buttons {\r\n    height: 50px;\r\n}\r\n\r\n#labDoc {\r\n    padding: 10px;\r\n    border: 1px solid rgba(1, 1, 12, 0.20);\r\n    border-radius: 5px;\r\n    margin-bottom: 10px;\r\n    z-index: 1;\r\n}\r\n#main {\r\n    z-index: 1;\r\n    \r\n}\r\n#main.inDialog {\r\n    pointer-events: none;\r\n}\r\n.hide {\r\n    display: none;\r\n    max-height: 0;\r\n}\r\n\r\n.dialog {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    z-index: 10000;\r\n    height: 100%;\r\n    width: 100%;\r\n    background: rgba(12,12,12,0.5);\r\n\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n\r\n    pointer-events: none;\r\n}\r\nform {\r\n    pointer-events: auto;\r\n    z-index: 10001;\r\n    background: white;\r\n    width: 270px;\r\n    height: 180px;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    text-align: center;\r\n    border-radius: 5px;\r\n}\r\n\r\nform input[type=\"text\"] {\r\n    margin: 0 auto;\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    width: 150px;\r\n}\r\n\r\nform .error {\r\n    color: red;\r\n}\r\n\r\nform::after {\r\n    clear: both;\r\n}\r\n.form-group { \r\n    position: relative;\r\n}\r\n.close {\r\n    line-height: 20px;\r\n    position: absolute;\r\n    right: 0;\r\n    top: -5px;\r\n    text-align: center;\r\n    width: 20px;\r\n    text-decoration: none;\r\n    font-weight: bold;\r\n    box-shadow: 1px 1px 3px rgba(0,0,0,0.75);\r\n}\r\n\r\n#preloader.active {\r\n    position: fixed;\r\n    top: 0;\r\n    left: 0;\r\n    height: 100vh;\r\n    width: 100vw;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n    width: 50px;\r\n    height: 50px;\r\n    position: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n    content: '';\r\n    position: absolute;\r\n    top: 67px;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 6px;\r\n    background: black;\r\n    opacity: .2;\r\n    border-radius: 50%;\r\n    animation: shadow .5s linear infinite;\r\n}\r\n\r\n#preloader.active #inner:after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 50px;\r\n    background: white;\r\n    animation: rotate .5s linear infinite;\r\n    border-radius: 5px;\r\n}\r\n\r\n@keyframes rotate {\r\n    0% {\r\n        transform: translateY(0) rotate(0deg);\r\n    }\r\n    25% {\r\n        transform: translateY(10px) rotate(22.5deg);\r\n    }\r\n    50% {\r\n        transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n        border-bottom-right-radius: 50px;\r\n    }\r\n    75% {\r\n        transform: translateY(10px) rotate(67.5deg);\r\n    }\r\n    100% {\r\n        transform: translateY(0) rotate(90deg);\r\n    }\r\n}\r\n\r\n@keyframes shadow {\r\n    0%,\r\n    100% {\r\n        transform: scaleX(1);\r\n    }\r\n    50% {\r\n        transform: scaleX(1.2);\r\n    }\r\n}", ""]);
 	
 	// exports
 
@@ -18991,7 +18997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(Input.prototype), "constructor", this).call(this, {
 	            x: x,
 	            y: y,
-	            radius: 8,
+	            radius: 4,
 	            stroke: "black",
 	            strokeWidth: 1,
 	            fill: "rgba(12,12,12,0.2)"
@@ -19175,8 +19181,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(Meter.prototype), "constructor", this).call(this, {
 	            x: x,
 	            y: y,
-	            width: 50,
-	            height: 25,
+	            width: 25,
+	            height: 12.5,
 	            fill: "rgba(12,12,12,0.1)",
 	            stroke: "black",
 	            strokeWidth: 1
@@ -19190,8 +19196,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.x = this.attrs.x;
 	        this.y = this.attrs.y;
 	        this._id = Math.floor(Math.random() * 1000);
-	        this.inputOne = new Input(this.x - 20, parseInt(this.y) + 12.5, this.stand, this);
-	        this.inputTwo = new Input(this.x + 70, parseInt(this.y) + 12.5, this.stand, this);
+	        this.inputOne = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
+	        this.inputTwo = new Input(this.x + 35, parseInt(this.y) + 6.25, this.stand, this);
 	        this.display = new Label({
 	            x: this.x,
 	            y: this.y });
@@ -19199,8 +19205,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.display.add(new Text({
 	            text: this._getValue(),
 	            fontFamily: "Calibri",
-	            fontSize: 18,
-	            padding: 5,
+	            fontSize: 10,
+	            padding: 2,
 	            fill: "black"
 	        }));
 	        this.stand.addElements([this.inputOne, this.inputTwo, this.display]);
@@ -19257,8 +19263,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(Resister.prototype), "constructor", this).call(this, {
 	            x: x,
 	            y: y,
-	            width: 65,
-	            height: 25,
+	            width: 40,
+	            height: 12.5,
 	            stroke: "black",
 	            strokeWidth: 1,
 	            fill: "rgba(12,12,12,0.1)"
@@ -19272,8 +19278,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.value = "" + this.val + " Om";
 	        this.stand = stand;
 	        this._id = Math.floor(Math.random() * 1000);
-	        this.inputOne = new Input(this.x - 20, parseInt(this.y) + 12.5, this.stand, this);
-	        this.inputTwo = new Input(this.x + 85, parseInt(this.y) + 12.5, this.stand, this);
+	        this.inputOne = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
+	        this.inputTwo = new Input(this.x + 50, parseInt(this.y) + 6.25, this.stand, this);
 	        this.display = new Label({
 	            x: this.x,
 	            y: this.y });
@@ -19281,8 +19287,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.display.add(new Text({
 	            text: this.value,
 	            fontFamily: "Calibri",
-	            fontSize: 14,
-	            padding: 5,
+	            fontSize: 10,
+	            padding: 2,
 	            fill: "black"
 	        }));
 	        this.stand.addElements([this.inputOne, this.inputTwo, this.display]);
@@ -19325,10 +19331,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _get(Object.getPrototypeOf(Picker.prototype), "constructor", this).call(this, {
 	            x: x,
 	            y: y,
-	            radius: 15,
+	            radius: 7.5,
 	            fill: "transparent",
 	            stroke: "grey",
-	            strokeWidth: 3
+	            strokeWidth: 1.5
 	        });
 	
 	        /* parameters */
@@ -19336,10 +19342,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.y = this.attrs.y;
 	
 	        this.background = new Rect({
-	            x: this.x - 30,
-	            y: this.y - 40,
-	            width: 60,
-	            height: 60,
+	            x: this.x - 20,
+	            y: this.y - 20,
+	            width: 40,
+	            height: 30,
 	            fill: "rgba(12,12,12,0.1)",
 	            stroke: "black",
 	            strokeWidth: 1
@@ -19347,13 +19353,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        this.display = new Label({
 	            x: this.x - 15,
-	            y: this.y - 40 });
+	            y: this.y - 20 });
 	
 	        this.display.add(new Text({
 	            text: "test",
 	            fontFamily: "Calibri",
-	            fontSize: 14,
-	            padding: 5,
+	            fontSize: 10,
+	            padding: 2,
 	            fill: "black"
 	        }));
 	
@@ -19403,8 +19409,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var step = 180 / data.length;
 	                data.map(function (el, i) {
 	                    states.push({
-	                        x: _this.x - (10 + i) * Math.cos(i),
-	                        y: _this.y - 10 * Math.round(Math.sin(i)),
+	                        x: _this.x - (5 + i) * Math.cos(i),
+	                        y: _this.y - 5 * Math.round(Math.sin(i)),
 	                        value: el
 	                    });
 	                });
@@ -19428,46 +19434,127 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Lab_1: {
 	        doc: "http://yanko.lib.ru/books/philosoph/mgu-ist_filosofii-2005-8l.pdf",
 	        stand: [{
-	            type: "Picker",
-	            x: 400,
-	            y: 300,
-	            data: ["0", "10", "50", "100", "150", "200"],
+	            type: "Meter",
+	            x: 60,
+	            y: 25,
 	            param: "A"
 	        }, {
 	            type: "Meter",
-	            x: 80,
-	            y: 50,
+	            x: 130,
+	            y: 25,
 	            param: "A"
 	        }, {
 	            type: "Meter",
 	            x: 200,
-	            y: 50,
+	            y: 25,
 	            param: "A"
 	        }, {
 	            type: "Meter",
-	            x: 320,
-	            y: 50,
+	            x: 270,
+	            y: 25,
+	            param: "A"
+	        }, {
+	            type: "Meter",
+	            x: 340,
+	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Meter",
-	            x: 440,
-	            y: 50,
+	            x: 410,
+	            y: 25,
+	            param: "V"
+	        }, {
+	            type: "Meter",
+	            x: 480,
+	            y: 25,
+	            param: "V"
+	        }, {
+	            type: "Meter",
+	            x: 550,
+	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Resister",
-	            x: 80,
+	            x: 130,
+	            y: 100,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 130,
 	            y: 150,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 80,
+	            x: 130,
 	            y: 200,
-	            value: "100"
+	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 80,
+	            x: 130,
 	            y: 250,
-	            value: "1000"
+	            value: "10"
+	        }, {
+	            type: "Picker",
+	            x: 150,
+	            y: 300,
+	            data: ["0", "100", "200", "300", "400", "500"],
+	            param: "Om"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 100,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 140,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 180,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 220,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 260,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 280,
+	            y: 300,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 450,
+	            y: 100,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 450,
+	            y: 150,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 450,
+	            y: 200,
+	            value: "10"
+	        }, {
+	            type: "Resister",
+	            x: 450,
+	            y: 250,
+	            value: "10"
+	        }, {
+	            type: "Picker",
+	            x: 470,
+	            y: 300,
+	            data: ["0", "100", "200", "300", "400", "500"],
+	            param: "Om"
 	        }]
 	    },
 	    Lab_2: {
@@ -19504,6 +19591,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	module.exports = labs;
+	/*
+	{
+	  type: 'Meter',
+	  x: 80,
+	  y: 50,
+	  param: 'A'
+	},
+	{
+	  type: 'Meter',
+	  x: 200,
+	  y: 50,
+	  param: 'A'
+	},
+	{
+	  type: 'Meter',
+	  x: 320,
+	  y: 50,
+	  param: 'V'
+	},
+	{
+	  type: 'Meter',
+	  x: 440,
+	  y: 50,
+	  param: 'V'
+	},
+	{
+	  type: 'Resister',
+	  x: 80,
+	  y: 150,
+	  value: '10'
+	},
+	{
+	  type: 'Resister',
+	  x: 80,
+	  y: 200,
+	  value: '100'
+	},
+	{
+	  type: 'Resister',
+	  x: 80,
+	  y: 250,
+	  value: '1000'
+	},*/
 
 /***/ }
 /******/ ])

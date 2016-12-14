@@ -29,7 +29,18 @@
                 <p name="error" class="error"></p>
                 <label for="user">Введите имя, для загрузки лаборатории</label>
                 <input type="text" name="user" placeholder="Username" class="form-control"/>
-                <button type="submit" class="btn btn-warning" id="loadDialogBtn">Load</button>
+                <button type="submit" class="btn btn-success" id="loadDialogBtn">Load</button>
+                <a title="Закрыть" id="closeloadBtn" class="close">X</a>
+            </div>
+        </form>
+    </div>
+    <div id="loadDialog" class="dialog hide">
+        <form id="loadForm">
+            <div class="form-group">
+                <p name="error" class="error"></p>
+                <label for="user">Введите имя, для загрузки лаборатории</label>
+                <input type="text" name="user" placeholder="Username" class="form-control"/>
+                <button type="submit" class="btn btn-success" id="loadDialogBtn">Load</button>
                 <a title="Закрыть" id="closeloadBtn" class="close">X</a>
             </div>
         </form>
@@ -50,7 +61,9 @@
                         <div id="buttons">
                             <button id="sendBtn" class="btn btn-primary">Send</button>
                             <button id="saveBtn" class="btn btn-success">Save</button>
-                            <button id="loadBtn" class="btn btn-warning">Import</button>
+                            <button id="loadBtn" class="btn btn-success">Load</button>
+                            <button id="importBtn" class="btn btn-warning">Import</button>
+                            <button id="exportBtn" class="btn btn-warning">Export</button>
                             <button id="resetBtn" class="btn btn-danger">Reset</button>
                         </div>
                     </div>
@@ -63,5 +76,4 @@
     </div>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </body>
-
 </html>
