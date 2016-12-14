@@ -69,7 +69,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        preloader.className = "hide";
 	
 	        var App = __webpack_require__(31);
-	        var labs = __webpack_require__(41);
+	        var labs = __webpack_require__(42);
 	        app = new App();
 	
 	        var labSelector = document.getElementById("selectLab");
@@ -2289,6 +2289,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Picker = _interopRequire(__webpack_require__(40));
 	
+	var GroundLine = _interopRequire(__webpack_require__(41));
+	
+	var Frame = _interopRequire(__webpack_require__(43));
+	
 	var Stand = (function (_Stage) {
 	    function Stand() {
 	        _classCallCheck(this, Stand);
@@ -2408,6 +2412,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                case "Picker":
 	                                    elements.push(new Picker(el.x, el.y, el.data, el.param, this));
 	                                    break;
+	                                case "GroundLine":
+	                                    elements.push(new GroundLine(this));
+	                                    break;
+	                                case "Frame":
+	                                    elements.push(new Frame(el.points, this));
+	                                    break;
 	                            }
 	                        }
 	                    }
@@ -2488,6 +2498,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                param: element.param
 	                            };
 	                            break;
+	                        case "GroundLine":
+	                            el = {
+	                                type: "GroundLine"
+	                            };
+	                            break;
+	                        case "Frame":
+	                            el = {
+	                                type: "Frame",
+	                                points: element.points
+	                            };
 	                        default:
 	                            break;
 	                    }
@@ -18991,16 +19011,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this = this;
 	
 	        var owner = arguments[3] === undefined ? null : arguments[3];
+	        var scale = arguments[4] === undefined ? 1 : arguments[4];
+	        var fill = arguments[5] === undefined ? "rgba(12,12,12,0.2)" : arguments[5];
 	
 	        _classCallCheck(this, Input);
 	
 	        _get(Object.getPrototypeOf(Input.prototype), "constructor", this).call(this, {
 	            x: x,
 	            y: y,
-	            radius: 4,
+	            radius: 4 * scale,
 	            stroke: "black",
 	            strokeWidth: 1,
-	            fill: "rgba(12,12,12,0.2)"
+	            fill: fill
 	        });
 	
 	        /* parameters */
@@ -19016,6 +19038,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        /* handlers */
 	        this.on("mouseover", function () {
+	            document.body.style.cursor = "pointer";
+	
 	            if (_this.connectedInputs.length < 2 && _this.pointer !== null) {
 	                _this.pointer.destroy();
 	                _this.pointer = null;
@@ -19043,6 +19067,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	        this.on("dblclick", function () {
 	            _this.disconnect();
+	        });
+	        this.on("mouseout", function () {
+	            document.body.style.cursor = "default";
 	        });
 	    }
 	
@@ -19113,7 +19140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        _get(Object.getPrototypeOf(Wire.prototype), "constructor", this).call(this, {
 	            points: points,
-	            stroke: "black",
+	            stroke: "darkblue",
 	            strokeWidth: 1
 	        });
 	
@@ -19465,6 +19492,68 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var _konva = __webpack_require__(33);
+	
+	var Circle = _konva.Circle;
+	var Line = _konva.Line;
+	var Rect = _konva.Rect;
+	var Label = _konva.Label;
+	var Text = _konva.Text;
+	var Shape = _konva.Shape;
+	
+	var Input = _interopRequire(__webpack_require__(36));
+	
+	var GroundLine = (function (_Line) {
+	    function GroundLine(stand) {
+	        _classCallCheck(this, GroundLine);
+	
+	        _get(Object.getPrototypeOf(GroundLine.prototype), "constructor", this).call(this, {
+	            points: [30, 360, 70, 360, 50, 360, 50, 340, 550, 340],
+	            stroke: "black",
+	            strokeWidth: 4
+	        });
+	
+	        /* parameters */
+	        this.type = "GroundLine";
+	        this.stand = stand;
+	        this.connections = [];
+	        this.x = 50;
+	        this.y = 340;
+	        this.connections.push(new Input(this.x, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 100, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 200, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 300, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 400, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 500, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	
+	        this.stand.addElements(this.connections);
+	        this.connections.map(function (e) {
+	            return e.moveToTop();
+	        });
+	        /* handlers */
+	    }
+	
+	    _inherits(GroundLine, _Line);
+	
+	    return GroundLine;
+	})(Line);
+	
+	module.exports = GroundLine;
+
+/***/ },
+/* 42 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -19473,6 +19562,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Lab_1: {
 	        doc: "http://yanko.lib.ru/books/philosoph/mgu-ist_filosofii-2005-8l.pdf",
 	        stand: [{
+	            type: "Frame",
+	            points: [50, 15, 280, 15, 280, 35, 50, 35]
+	        }, {
 	            type: "Meter",
 	            x: 60,
 	            y: 25,
@@ -19493,6 +19585,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            y: 25,
 	            param: "A"
 	        }, {
+	            type: "Frame",
+	            points: [330, 15, 560, 15, 560, 35, 330, 35]
+	        }, {
 	            type: "Meter",
 	            x: 340,
 	            y: 25,
@@ -19512,6 +19607,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            x: 550,
 	            y: 25,
 	            param: "V"
+	        }, {
+	            type: "Frame",
+	            points: [120, 90, 140, 90, 140, 310, 120, 310]
 	        }, {
 	            type: "Resister",
 	            x: 130,
@@ -19538,6 +19636,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            y: 300,
 	            data: ["0", "100", "200", "300", "400", "500"],
 	            param: "Om"
+	        }, {
+	            type: "Frame",
+	            points: [270, 90, 290, 90, 290, 310, 270, 310]
 	        }, {
 	            type: "Resister",
 	            x: 280,
@@ -19569,6 +19670,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            y: 300,
 	            value: "10"
 	        }, {
+	            type: "Frame",
+	            points: [440, 90, 460, 90, 460, 310, 440, 310]
+	        }, {
 	            type: "Resister",
 	            x: 450,
 	            y: 100,
@@ -19594,7 +19698,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	            y: 300,
 	            data: ["0", "100", "200", "300", "400", "500"],
 	            param: "Om"
-	        }]
+	        }, {
+	            type: "GroundLine" } /*
+	                                 {
+	                                    type: 'Meter',
+	                                    x: 80,
+	                                    y: 50,
+	                                    param: 'A'
+	                                 },
+	                                 {
+	                                    type: 'Meter',
+	                                    x: 200,
+	                                    y: 50,
+	                                    param: 'A'
+	                                 },
+	                                 {
+	                                    type: 'Meter',
+	                                    x: 320,
+	                                    y: 50,
+	                                    param: 'V'
+	                                 },
+	                                 {
+	                                    type: 'Meter',
+	                                    x: 440,
+	                                    y: 50,
+	                                    param: 'V'
+	                                 },
+	                                 {
+	                                    type: 'Resister',
+	                                    x: 80,
+	                                    y: 150,
+	                                    value: '10'
+	                                 },
+	                                 {
+	                                    type: 'Resister',
+	                                    x: 80,
+	                                    y: 200,
+	                                    value: '100'
+	                                 },
+	                                 {
+	                                    type: 'Resister',
+	                                    x: 80,
+	                                    y: 250,
+	                                    value: '1000'
+	                                 },*/
+	        ]
 	    },
 	    Lab_2: {
 	        doc: "http://www.en2.ru/download/bonk.pdf",
@@ -19630,49 +19778,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	module.exports = labs;
-	/*
-	{
-	  type: 'Meter',
-	  x: 80,
-	  y: 50,
-	  param: 'A'
-	},
-	{
-	  type: 'Meter',
-	  x: 200,
-	  y: 50,
-	  param: 'A'
-	},
-	{
-	  type: 'Meter',
-	  x: 320,
-	  y: 50,
-	  param: 'V'
-	},
-	{
-	  type: 'Meter',
-	  x: 440,
-	  y: 50,
-	  param: 'V'
-	},
-	{
-	  type: 'Resister',
-	  x: 80,
-	  y: 150,
-	  value: '10'
-	},
-	{
-	  type: 'Resister',
-	  x: 80,
-	  y: 200,
-	  value: '100'
-	},
-	{
-	  type: 'Resister',
-	  x: 80,
-	  y: 250,
-	  value: '1000'
-	},*/
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var Line = __webpack_require__(33).Line;
+	
+	var Frame = (function (_Line) {
+	    function Frame(points, stand) {
+	        _classCallCheck(this, Frame);
+	
+	        _get(Object.getPrototypeOf(Frame.prototype), "constructor", this).call(this, {
+	            points: points,
+	            stoke: "rgba(0,0,0,0.5)",
+	            strokeWidth: 2
+	        });
+	
+	        /* parameters */
+	        this.type = "Frame";
+	        this.stand = stand;
+	        this.points = points;
+	        /* handlers */
+	    }
+	
+	    _inherits(Frame, _Line);
+	
+	    return Frame;
+	})(Line);
+	
+	module.exports = Frame;
 
 /***/ }
 /******/ ])
