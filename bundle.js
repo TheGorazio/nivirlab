@@ -62,77 +62,75 @@ return /******/ (function(modules) { // webpackBootstrap
 	    app = undefined;
 	
 	window.onload = function () {
-	    setTimeout(function () {
-	        main = document.getElementById("main");
-	        main.className = "";
-	        var preloader = document.getElementById("preloader");
-	        preloader.className = "hide";
+	    main = document.getElementById("main");
+	    main.className = "";
+	    var preloader = document.getElementById("preloader");
+	    preloader.className = "hide";
 	
-	        var App = __webpack_require__(31);
-	        var labs = __webpack_require__(42);
-	        app = new App();
+	    var App = __webpack_require__(31);
+	    var labs = __webpack_require__(44);
+	    app = new App();
 	
-	        var labSelector = document.getElementById("selectLab");
-	        var labId = labSelector.value;
-	        var data = labs[labId];
+	    var labSelector = document.getElementById("selectLab");
+	    var labId = labSelector.value;
+	    var data = labs[labId];
 	
-	        var labDoc = document.getElementById("labDoc");
-	        labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[labId].doc + "\"/>";
-	        var labPdf = document.getElementById("labPdf");
-	        labDoc.style.height = labPdf.clientHeight;
-	        labDoc.style.width = labPdf.clientWidth;
+	    var labDoc = document.getElementById("labDoc");
+	    labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[labId].doc + "\"/>";
+	    var labPdf = document.getElementById("labPdf");
+	    labDoc.style.height = labPdf.clientHeight;
+	    labDoc.style.width = labPdf.clientWidth;
 	
-	        labSelector.addEventListener("change", function (e) {
-	            console.log(e.target.value);
-	            data = labs[e.target.value];
-	            labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + data.doc + "\"/>";
-	            app.update(data.stand);
+	    labSelector.addEventListener("change", function (e) {
+	        console.log(e.target.value);
+	        data = labs[e.target.value];
+	        labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + data.doc + "\"/>";
+	        app.update(data.stand);
+	    });
+	
+	    app.start(data.stand);
+	
+	    /* buttons */
+	    var resetBtn = document.getElementById("resetBtn");
+	    resetBtn.addEventListener("click", function () {
+	        app.update(data.stand);
+	    });
+	
+	    var sendBtn = document.getElementById("sendBtn");
+	    var instance = axios.create({
+	        baseURL: "https://virlab.herokuapp.com"
+	    });
+	
+	    sendBtn.addEventListener("click", function () {
+	        var data = app._getStandArray();
+	
+	        console.log(data);
+	
+	        instance.post("/check", {
+	            data: data
+	        }).then(function (response) {
+	            console.log(response);
+	        })["catch"](function (error) {
+	            console.log(error);
 	        });
+	    });
 	
-	        app.start(data.stand);
-	
-	        /* buttons */
-	        var resetBtn = document.getElementById("resetBtn");
-	        resetBtn.addEventListener("click", function () {
-	            app.update(data.stand);
-	        });
-	
-	        var sendBtn = document.getElementById("sendBtn");
-	        var instance = axios.create({
-	            baseURL: "https://virlab.herokuapp.com"
-	        });
-	
-	        sendBtn.addEventListener("click", function () {
-	            var data = app._getStandArray();
-	
-	            console.log(data);
-	
-	            instance.post("/check", {
-	                data: data
-	            }).then(function (response) {
-	                console.log(response);
-	            })["catch"](function (error) {
-	                console.log(error);
-	            });
-	        });
-	
-	        var saveBtn = document.getElementById("saveBtn");
-	        saveBtn.addEventListener("click", function (e) {
-	            showModal("save");
-	        });
-	        var loadBtn = document.getElementById("loadBtn");
-	        loadBtn.addEventListener("click", function (e) {
-	            showModal("load");
-	        });
-	        var importBtn = document.getElementById("importBtn");
-	        saveBtn.addEventListener("click", function (e) {
-	            showModal("save");
-	        });
-	        var exportBtn = document.getElementById("exportBtn");
-	        loadBtn.addEventListener("click", function (e) {
-	            showModal("load");
-	        });
-	    }, 0);
+	    var saveBtn = document.getElementById("saveBtn");
+	    saveBtn.addEventListener("click", function (e) {
+	        showModal("save");
+	    });
+	    var loadBtn = document.getElementById("loadBtn");
+	    loadBtn.addEventListener("click", function (e) {
+	        showModal("load");
+	    });
+	    var importBtn = document.getElementById("importBtn");
+	    saveBtn.addEventListener("click", function (e) {
+	        showModal("save");
+	    });
+	    var exportBtn = document.getElementById("exportBtn");
+	    loadBtn.addEventListener("click", function (e) {
+	        showModal("load");
+	    });
 	};
 	
 	function showModal(type) {
@@ -2291,7 +2289,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var GroundLine = _interopRequire(__webpack_require__(41));
 	
-	var Frame = _interopRequire(__webpack_require__(43));
+	var Frame = _interopRequire(__webpack_require__(42));
+	
+	var Capacity = _interopRequire(__webpack_require__(43));
+	
+	var Inductance = _interopRequire(__webpack_require__(45));
+	
+	var Current = _interopRequire(__webpack_require__(46));
 	
 	var Stand = (function (_Stage) {
 	    function Stand() {
@@ -2370,6 +2374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	                        if (element.type !== "undefined") this.components.push(element);
 	                        this.add(this.panel.add(element));
+	                        if (element.type === "GroundLine") element.moveDown();
 	                    }
 	                } catch (err) {
 	                    _didIteratorError = true;
@@ -2416,7 +2421,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    elements.push(new GroundLine(this));
 	                                    break;
 	                                case "Frame":
-	                                    elements.push(new Frame(el.points, this));
+	                                    elements.push(new Frame(el.x1, el.y1, el.x2, el.y2, this));
+	                                    break;
+	                                case "Capacity":
+	                                    elements.push(new Capacity(el.x, el.y, el.value, this));
+	                                    break;
+	                                case "Inductance":
+	                                    elements.push(new Inductance(el.x, el.y, el.value, this));
+	                                    break;
+	                                case "Current":
+	                                    elements.push(new Current(el.x, el.y, this));
 	                                    break;
 	                            }
 	                        }
@@ -2506,8 +2520,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        case "Frame":
 	                            el = {
 	                                type: "Frame",
-	                                points: element.points
+	                                x1: element.x1,
+	                                y1: element.y1,
+	                                x2: element.x2,
+	                                y2: element.y2 };
+	                        case "Capacity":
+	                            el = {
+	                                type: "Capacity",
+	                                x: element.x,
+	                                y: element.y,
+	                                value: element.value
 	                            };
+	                        case "Inductance":
+	                            el = {
+	                                type: "Inductance",
+	                                x: element.x,
+	                                y: element.y,
+	                                value: element.value
+	                            };
+	                        case "Current":
+	                            var cinputs = [];
+	                            if (element.connectedInputs.length === 1) {
+	                                cinputs.push(element.connectedInputs[0]._id);
+	                            }
+	                            if (element.connectedInputs.length === 2) {
+	                                cinputs.push(element.connectedInputs[0]._id);
+	                                cinputs.push(element.connectedInputs[1]._id);
+	                            }
+	                            el = {
+	                                type: element.type,
+	                                x: element.x,
+	                                y: element.y,
+	                                connectedInputs: cinputs
+	                            };
+	                            break;
 	                        default:
 	                            break;
 	                    }
@@ -19027,8 +19073,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        /* parameters */
 	        this.stand = stand;
-	        this.x = this.attrs.x;
-	        this.y = this.attrs.y;
+	        this.x = x;
+	        this.y = y;
 	        this.connectedInputs = [];
 	        this.connecting = false;
 	        this.type = "Input";
@@ -19520,28 +19566,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _classCallCheck(this, GroundLine);
 	
 	        _get(Object.getPrototypeOf(GroundLine.prototype), "constructor", this).call(this, {
-	            points: [30, 360, 70, 360, 50, 360, 50, 340, 550, 340],
+	            points: [10, 360, 40, 360, 25, 360, 25, 340, 550, 340],
 	            stroke: "black",
-	            strokeWidth: 4
+	            strokeWidth: 2
 	        });
 	
 	        /* parameters */
 	        this.type = "GroundLine";
 	        this.stand = stand;
 	        this.connections = [];
-	        this.x = 50;
+	        this.x = 30;
 	        this.y = 340;
-	        this.connections.push(new Input(this.x, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
-	        this.connections.push(new Input(this.x + 100, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
-	        this.connections.push(new Input(this.x + 200, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
-	        this.connections.push(new Input(this.x + 300, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
-	        this.connections.push(new Input(this.x + 400, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
-	        this.connections.push(new Input(this.x + 500, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 20, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 120, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 220, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 320, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 420, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
+	        this.connections.push(new Input(this.x + 520, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
 	
 	        this.stand.addElements(this.connections);
 	        this.connections.map(function (e) {
-	            return e.moveToTop();
+	            e.setZIndex(1012);
 	        });
+	        this.stand.panel.draw();
+	
 	        /* handlers */
 	    }
 	
@@ -19554,6 +19602,118 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var Rect = __webpack_require__(33).Rect;
+	
+	var Frame = (function (_Rect) {
+	    function Frame(x1, y1, x2, y2, stand) {
+	        _classCallCheck(this, Frame);
+	
+	        _get(Object.getPrototypeOf(Frame.prototype), "constructor", this).call(this, {
+	            x: x1,
+	            y: y1,
+	            width: parseInt(x2) - parseInt(x1),
+	            height: parseInt(y2) - parseInt(y1),
+	            fill: "rgba(0,0,0,0)",
+	            stroke: "rgba(0,0,0,0.25)",
+	            strokeWidth: 1
+	        });
+	
+	        /* parameters */
+	        this.type = "Frame";
+	        this.stand = stand;
+	
+	        /* handlers */
+	    }
+	
+	    _inherits(Frame, _Rect);
+	
+	    return Frame;
+	})(Rect);
+	
+	module.exports = Frame;
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var _konva = __webpack_require__(33);
+	
+	var Line = _konva.Line;
+	var Shape = _konva.Shape;
+	var Text = _konva.Text;
+	var Label = _konva.Label;
+	
+	var Input = _interopRequire(__webpack_require__(36));
+	
+	var Capacity = (function (_Shape) {
+	    function Capacity(x, y, value, stand) {
+	        _classCallCheck(this, Capacity);
+	
+	        _get(Object.getPrototypeOf(Capacity.prototype), "constructor", this).call(this);
+	
+	        /* parameters */
+	        this.type = "Capacity";
+	        this.stand = stand;
+	        this.x = x;
+	        this.y = y;
+	        this.value = " " + value + " \n нФ";
+	
+	        this.leftSide = new Line({
+	            points: [this.x - 6, this.y, this.x + 8, this.y, this.x + 8, this.y - 10, this.x + 8, this.y + 10],
+	            stroke: "black",
+	            strokeWidth: 2
+	        });
+	        this.rightSide = new Line({
+	            points: [this.x + 46, this.y, this.x + 32, this.y, this.x + 32, this.y - 10, this.x + 32, this.y + 10],
+	            stroke: "black",
+	            strokeWidth: 2
+	        });
+	        this.leftInput = new Input(this.x - 10, this.y, this.stand);
+	        this.rightInput = new Input(this.x + 50, this.y, this.stand);
+	
+	        this.display = new Label({
+	            x: this.x + 9,
+	            y: this.y - 10 });
+	
+	        this.display.add(new Text({
+	            text: this.value,
+	            fontFamily: "Calibri",
+	            fontSize: 8,
+	            padding: 2,
+	            fill: "black"
+	        }));
+	        this.stand.addElements([this.leftSide, this.rightSide, this.leftInput, this.rightInput, this.display]);
+	    }
+	
+	    _inherits(Capacity, _Shape);
+	
+	    return Capacity;
+	})(Shape);
+	
+	module.exports = Capacity;
+
+/***/ },
+/* 44 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -19563,8 +19723,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        doc: "http://yanko.lib.ru/books/philosoph/mgu-ist_filosofii-2005-8l.pdf",
 	        stand: [{
 	            type: "Frame",
-	            points: [50, 15, 280, 15, 280, 35, 50, 35]
-	        }, {
+	            x1: 35, y1: 10,
+	            x2: 322, y2: 50 }, {
 	            type: "Meter",
 	            x: 60,
 	            y: 25,
@@ -19586,31 +19746,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            param: "A"
 	        }, {
 	            type: "Frame",
-	            points: [330, 15, 560, 15, 560, 35, 330, 35]
-	        }, {
+	            x1: 330, y1: 10,
+	            x2: 610, y2: 50 }, {
 	            type: "Meter",
-	            x: 340,
+	            x: 350,
 	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Meter",
-	            x: 410,
+	            x: 420,
 	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Meter",
-	            x: 480,
+	            x: 490,
 	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Meter",
-	            x: 550,
+	            x: 560,
 	            y: 25,
 	            param: "V"
 	        }, {
 	            type: "Frame",
-	            points: [120, 90, 140, 90, 140, 310, 120, 310]
-	        }, {
+	            x1: 105,
+	            y1: 85,
+	            x2: 195,
+	            y2: 325 }, {
 	            type: "Resister",
 	            x: 130,
 	            y: 100,
@@ -19638,40 +19800,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	            param: "Om"
 	        }, {
 	            type: "Frame",
-	            points: [270, 90, 290, 90, 290, 310, 270, 310]
-	        }, {
+	            x1: 265,
+	            y1: 85,
+	            x2: 355,
+	            y2: 325 }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 100,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 140,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 180,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 220,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 260,
 	            value: "10"
 	        }, {
 	            type: "Resister",
-	            x: 280,
+	            x: 290,
 	            y: 300,
 	            value: "10"
 	        }, {
 	            type: "Frame",
-	            points: [440, 90, 460, 90, 460, 310, 440, 310]
+	            x1: 425,
+	            y1: 85,
+	            x2: 515,
+	            y2: 325
 	        }, {
 	            type: "Resister",
 	            x: 450,
@@ -19699,49 +19866,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	            data: ["0", "100", "200", "300", "400", "500"],
 	            param: "Om"
 	        }, {
-	            type: "GroundLine" } /*
-	                                 {
-	                                    type: 'Meter',
-	                                    x: 80,
-	                                    y: 50,
-	                                    param: 'A'
-	                                 },
-	                                 {
-	                                    type: 'Meter',
-	                                    x: 200,
-	                                    y: 50,
-	                                    param: 'A'
-	                                 },
-	                                 {
-	                                    type: 'Meter',
-	                                    x: 320,
-	                                    y: 50,
-	                                    param: 'V'
-	                                 },
-	                                 {
-	                                    type: 'Meter',
-	                                    x: 440,
-	                                    y: 50,
-	                                    param: 'V'
-	                                 },
-	                                 {
-	                                    type: 'Resister',
-	                                    x: 80,
-	                                    y: 150,
-	                                    value: '10'
-	                                 },
-	                                 {
-	                                    type: 'Resister',
-	                                    x: 80,
-	                                    y: 200,
-	                                    value: '100'
-	                                 },
-	                                 {
-	                                    type: 'Resister',
-	                                    x: 80,
-	                                    y: 250,
-	                                    value: '1000'
-	                                 },*/
+	            type: "GroundLine" }, {
+	            type: "Frame",
+	            x1: 185,
+	            y1: 360,
+	            x2: 275,
+	            y2: 520 }, {
+	            type: "Capacity",
+	            x: 210,
+	            y: 380,
+	            value: "10"
+	        }, {
+	            type: "Capacity",
+	            x: 210,
+	            y: 420,
+	            value: "22"
+	        }, {
+	            type: "Capacity",
+	            x: 210,
+	            y: 460,
+	            value: "100"
+	        }, {
+	            type: "Capacity",
+	            x: 210,
+	            y: 500,
+	            value: "1000"
+	        }, {
+	            type: "Frame",
+	            x1: 345,
+	            y1: 360,
+	            x2: 435,
+	            y2: 485 }, {
+	            type: "Inductance",
+	            x: 370,
+	            y: 380,
+	            value: "470 мк"
+	        }, {
+	            type: "Inductance",
+	            x: 370,
+	            y: 420,
+	            value: "1 м"
+	        }, {
+	            type: "Inductance",
+	            x: 370,
+	            y: 460,
+	            value: "10 м"
+	        } /*,
+	          {
+	             type: 'Current',
+	             x: 50,
+	             y: 250
+	          }*/
 	        ]
 	    },
 	    Lab_2: {
@@ -19780,10 +19955,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = labs;
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
@@ -19791,31 +19968,161 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 	
-	var Line = __webpack_require__(33).Line;
+	var _konva = __webpack_require__(33);
 	
-	var Frame = (function (_Line) {
-	    function Frame(points, stand) {
-	        _classCallCheck(this, Frame);
+	var Line = _konva.Line;
+	var Shape = _konva.Shape;
+	var Text = _konva.Text;
+	var Label = _konva.Label;
+	var Arc = _konva.Arc;
 	
-	        _get(Object.getPrototypeOf(Frame.prototype), "constructor", this).call(this, {
-	            points: points,
-	            stoke: "rgba(0,0,0,0.5)",
+	var Input = _interopRequire(__webpack_require__(36));
+	
+	var Inductance = (function (_Shape) {
+	    function Inductance(x, y, value, stand) {
+	        _classCallCheck(this, Inductance);
+	
+	        _get(Object.getPrototypeOf(Inductance.prototype), "constructor", this).call(this);
+	
+	        /* parameters */
+	        this.type = "Inductance";
+	        this.stand = stand;
+	        this.x = x;
+	        this.y = y;
+	        this.value = " " + value + "Гн";
+	
+	        this.leftSide = new Line({
+	            points: [this.x - 6, this.y, this.x + 5, this.y],
+	            stroke: "black",
 	            strokeWidth: 2
+	        });
+	        this.rightSide = new Line({
+	            points: [this.x + 46, this.y, this.x + 33, this.y],
+	            stroke: "black",
+	            strokeWidth: 2
+	        });
+	        this.leftInput = new Input(this.x - 10, this.y, this.stand);
+	        this.rightInput = new Input(this.x + 50, this.y, this.stand);
+	
+	        var arc1 = new Arc({
+	            x: this.x + 9,
+	            y: this.y,
+	            innerRadius: 5,
+	            outerRadius: 5,
+	            fill: "red",
+	            stroke: "black",
+	            strokeWidth: 2,
+	            angle: 180,
+	            rotation: 180
+	        });
+	        var arc2 = new Arc({
+	            x: this.x + 19,
+	            y: this.y,
+	            innerRadius: 5,
+	            outerRadius: 5,
+	            fill: "red",
+	            stroke: "black",
+	            strokeWidth: 2,
+	            angle: 180,
+	            rotation: 180
+	        });
+	        var arc3 = new Arc({
+	            x: this.x + 29,
+	            y: this.y,
+	            innerRadius: 5,
+	            outerRadius: 5,
+	            fill: "red",
+	            stroke: "black",
+	            strokeWidth: 2,
+	            angle: 180,
+	            rotation: 180
+	        });
+	        this.stand.add(this.stand.panel.add(arc1));
+	        this.stand.add(this.stand.panel.add(arc2));
+	        this.stand.add(this.stand.panel.add(arc3));
+	
+	        this.display = new Label({
+	            x: this.x + 9,
+	            y: this.y - 20 });
+	
+	        this.display.add(new Text({
+	            text: this.value,
+	            fontFamily: "Calibri",
+	            fontSize: 8,
+	            padding: 2,
+	            fill: "black"
+	        }));
+	
+	        this.stand.addElements([this.leftSide, this.rightSide, this.leftInput, this.rightInput, this.display]);
+	    }
+	
+	    _inherits(Inductance, _Shape);
+	
+	    return Inductance;
+	})(Shape);
+	
+	module.exports = Inductance;
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var _konva = __webpack_require__(33);
+	
+	var Text = _konva.Text;
+	var Label = _konva.Label;
+	
+	var Input = _interopRequire(__webpack_require__(36));
+	
+	var Current = (function (_Input) {
+	    function Current(x, y, stand) {
+	        var owner = arguments[3] === undefined ? null : arguments[3];
+	        var scale = arguments[4] === undefined ? 1 : arguments[4];
+	        var fill = arguments[5] === undefined ? "rgba(12,12,12,0.2)" : arguments[5];
+	
+	        _classCallCheck(this, Current);
+	
+	        _get(Object.getPrototypeOf(Current.prototype), "constructor", this).call(this, {
+	            x: x,
+	            y: y,
+	            stand: stand
 	        });
 	
 	        /* parameters */
-	        this.type = "Frame";
+	        this.type = "Current";
 	        this.stand = stand;
-	        this.points = points;
-	        /* handlers */
+	
+	        this.display = new Label({
+	            x: x - 20,
+	            y: y });
+	
+	        this.display.add(new Text({
+	            text: "+E",
+	            fontFamily: "Calibri",
+	            fontSize: 12,
+	            padding: 2,
+	            fill: "black"
+	        }));
+	
+	        this.stand.addElements([this.display]);
 	    }
 	
-	    _inherits(Frame, _Line);
+	    _inherits(Current, _Input);
 	
-	    return Frame;
-	})(Line);
+	    return Current;
+	})(Input);
 	
-	module.exports = Frame;
+	module.exports = Current;
 
 /***/ }
 /******/ ])
