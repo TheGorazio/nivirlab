@@ -68,32 +68,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    preloader.className = "hide";
 	
 	    var App = __webpack_require__(31);
-	    var labs = __webpack_require__(44);
+	    var labs = __webpack_require__(46);
+	    var standData = __webpack_require__(47).stand;
 	    app = new App();
 	
 	    var labSelector = document.getElementById("selectLab");
 	    var labId = labSelector.value;
-	    var data = labs[labId];
 	
 	    var labDoc = document.getElementById("labDoc");
-	    labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[labId].doc + "\"/>";
+	    labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[labId] + "\"/>";
 	    var labPdf = document.getElementById("labPdf");
 	    labDoc.style.height = labPdf.clientHeight;
 	    labDoc.style.width = labPdf.clientWidth;
 	
 	    labSelector.addEventListener("change", function (e) {
 	        console.log(e.target.value);
-	        data = labs[e.target.value];
-	        labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + data.doc + "\"/>";
-	        app.update(data.stand);
+	        labDoc.innerHTML = "<embed id=\"labPdf\" class=\"pdf\" src=\"" + labs[e.target.value] + "\"/>";
 	    });
 	
-	    app.start(data.stand);
+	    app.start(standData);
 	
 	    /* buttons */
 	    var resetBtn = document.getElementById("resetBtn");
 	    resetBtn.addEventListener("click", function () {
-	        app.update(data.stand);
+	        var wrap = document.getElementById("standWrapper");
+	        app.update();
 	    });
 	
 	    var sendBtn = document.getElementById("sendBtn");
@@ -104,8 +103,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    sendBtn.addEventListener("click", function () {
 	        var data = app._getStandArray();
 	
-	        console.log(data);
-	
 	        instance.post("/check", {
 	            data: data
 	        }).then(function (response) {
@@ -115,21 +112,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    });
 	
-	    var saveBtn = document.getElementById("saveBtn");
-	    saveBtn.addEventListener("click", function (e) {
-	        showModal("save");
-	    });
-	    var loadBtn = document.getElementById("loadBtn");
-	    loadBtn.addEventListener("click", function (e) {
-	        showModal("load");
-	    });
+	    /* let saveBtn = document.getElementById('saveBtn');
+	     saveBtn.addEventListener('click', (e) => {
+	         showModal('save');
+	     });
+	     let loadBtn = document.getElementById('loadBtn');
+	     loadBtn.addEventListener('click', (e) => {
+	         showModal('load');
+	     });*/
 	    var importBtn = document.getElementById("importBtn");
-	    saveBtn.addEventListener("click", function (e) {
-	        showModal("save");
+	    importBtn.addEventListener("click", function (e) {
+	        showModal("import");
 	    });
 	    var exportBtn = document.getElementById("exportBtn");
-	    loadBtn.addEventListener("click", function (e) {
-	        showModal("load");
+	    exportBtn.addEventListener("click", function (e) {
+	        showModal("export");
 	    });
 	};
 	
@@ -140,18 +137,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    main.className = "inDialog";
 	
+	    var listeners = {
+	        "import": importListener,
+	        save: saveListener,
+	        load: loadListener
+	    };
+	
 	    var form = document.getElementById("" + type + "Form");
 	    var submitBtn = document.getElementById("" + type + "DialogBtn");
-	    var listener = type === "save" ? saveListener : loadListener;
-	    listener.form = form;
-	    submitBtn.addEventListener("click", listener);
+	    if (type !== "export") {
+	        var listener = listeners[type];
+	        listener.form = form;
+	    }
+	
+	    var escListener = function escListener(e) {
+	        if (e.keyCode === 27) {
+	            closeDialog(dialog, submitBtn, this);
+	        }
+	    };
+	    window.addEventListener("keyup", escListener);
+	
+	    if (type !== "export") {
+	        submitBtn.addEventListener("click", listener);
+	    } else {
+	        form.children[0].children[2].value = app.getWires() !== "Пустой проект" ? "[" + app.getWires() + "]" : "Пустой проект";
+	        submitBtn.addEventListener("click", function (e) {
+	            e.preventDefault();
+	            form.children[0].children[2].select();
+	            form.children[0].children[3].innerHTML = "Copied...";
+	            document.execCommand("copy");
+	            setTimeout(function () {
+	                closeDialog(dialog, submitBtn, escListener);
+	            }, 600);
+	        });
+	    }
+	
 	    var close = document.getElementById("close" + type + "Btn");
 	    close.addEventListener("click", function (e) {
-	        main.className = "";
-	        submitBtn.removeEventListener("click", listener);
-	        dialog.className = "dialog hide";
+	        closeDialog(dialog, submitBtn, escListener);
 	    });
 	};
+	
+	function closeDialog(dialog, submit, listener) {
+	    main.className = "";
+	    submit.removeEventListener("click", listener);
+	    dialog.className = "dialog hide";
+	    window.removeEventListener("keyup", listener);
+	}
 	
 	function saveListener(e) {
 	    e.preventDefault();
@@ -190,6 +222,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 	}
+	
+	function importListener(e) {
+	    e.preventDefault();
+	    console.log("Import...");
+	    if (this.form.children[0].children[2].value !== "") {
+	        console.log(this.form.children[0].children[2].value);
+	        app.importWires(this.form.children[0].children[2].value);
+	    }
+	}
 
 /***/ },
 /* 1 */
@@ -226,7 +267,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	// module
-	exports.push([module.id, "body {\r\n    padding-top: 25px;\r\n}\r\n\r\n#stand {\r\n    border: 1px solid #ccc;\r\n    border-radius: 4px;\r\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n    display: inline-block;\r\n    height: 80vh;\r\n    margin-bottom: 25px;\r\n    height: 550px;\r\n}\r\n\r\n.info #selectLab {\r\n    font-size: 0.85em !important;\r\n    padding: 5px;\r\n}\r\n\r\n.labs {\r\n    height: 50px;\r\n}\r\n\r\n.data {\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    height: 50px;\r\n}\r\n\r\n.pdf {\r\n    width: 100%;\r\n    height: 450px;\r\n    \r\n    z-index: 1;\r\n}\r\n#buttons {\r\n    height: 50px;\r\n}\r\n\r\n#labDoc {\r\n    padding: 10px;\r\n    border: 1px solid rgba(1, 1, 12, 0.20);\r\n    border-radius: 5px;\r\n    margin-bottom: 10px;\r\n    z-index: 1;\r\n}\r\n#main {\r\n    z-index: 1;\r\n    \r\n}\r\n#main.inDialog {\r\n    pointer-events: none;\r\n}\r\n.hide {\r\n    display: none;\r\n    max-height: 0;\r\n}\r\n\r\n.dialog {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    z-index: 10000;\r\n    height: 100%;\r\n    width: 100%;\r\n    background: rgba(12,12,12,0.5);\r\n\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n\r\n    pointer-events: none;\r\n}\r\nform {\r\n    pointer-events: auto;\r\n    z-index: 10001;\r\n    background: white;\r\n    width: 270px;\r\n    height: 180px;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    text-align: center;\r\n    border-radius: 5px;\r\n}\r\n\r\nform input[type=\"text\"] {\r\n    margin: 0 auto;\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    width: 150px;\r\n}\r\n\r\nform .error {\r\n    color: red;\r\n}\r\n\r\nform::after {\r\n    clear: both;\r\n}\r\n.form-group { \r\n    position: relative;\r\n}\r\n.close {\r\n    line-height: 20px;\r\n    position: absolute;\r\n    right: 0;\r\n    top: -5px;\r\n    text-align: center;\r\n    width: 20px;\r\n    text-decoration: none;\r\n    font-weight: bold;\r\n    box-shadow: 1px 1px 3px rgba(0,0,0,0.75);\r\n}\r\n\r\n#preloader.active {\r\n    position: fixed;\r\n    top: 0;\r\n    left: 0;\r\n    height: 100vh;\r\n    width: 100vw;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n    width: 50px;\r\n    height: 50px;\r\n    position: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n    content: '';\r\n    position: absolute;\r\n    top: 67px;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 6px;\r\n    background: black;\r\n    opacity: .2;\r\n    border-radius: 50%;\r\n    animation: shadow .5s linear infinite;\r\n}\r\n\r\n#preloader.active #inner:after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 50px;\r\n    background: white;\r\n    animation: rotate .5s linear infinite;\r\n    border-radius: 5px;\r\n}\r\n\r\n@keyframes rotate {\r\n    0% {\r\n        transform: translateY(0) rotate(0deg);\r\n    }\r\n    25% {\r\n        transform: translateY(10px) rotate(22.5deg);\r\n    }\r\n    50% {\r\n        transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n        border-bottom-right-radius: 50px;\r\n    }\r\n    75% {\r\n        transform: translateY(10px) rotate(67.5deg);\r\n    }\r\n    100% {\r\n        transform: translateY(0) rotate(90deg);\r\n    }\r\n}\r\n\r\n@keyframes shadow {\r\n    0%,\r\n    100% {\r\n        transform: scaleX(1);\r\n    }\r\n    50% {\r\n        transform: scaleX(1.2);\r\n    }\r\n}", ""]);
+	exports.push([module.id, "body {\r\n    padding-top: 25px;\r\n}\r\n\r\n#stand {\r\n    border: 1px solid #ccc;\r\n    border-radius: 4px;\r\n    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);\r\n    display: inline-block;\r\n    height: 80vh;\r\n    margin-bottom: 25px;\r\n    height: 550px;\r\n}\r\n\r\n.info #selectLab {\r\n    font-size: 0.85em !important;\r\n    padding: 5px;\r\n}\r\n\r\n.labs {\r\n    height: 50px;\r\n}\r\n\r\n.data {\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    height: 50px;\r\n}\r\n\r\n.pdf {\r\n    width: 100%;\r\n    height: 450px;\r\n    \r\n    z-index: 1;\r\n}\r\n#buttons {\r\n    height: 50px;\r\n}\r\n\r\n#labDoc {\r\n    padding: 10px;\r\n    border: 1px solid rgba(1, 1, 12, 0.20);\r\n    border-radius: 5px;\r\n    margin-bottom: 10px;\r\n    z-index: 1;\r\n}\r\n#main {\r\n    z-index: 1;\r\n    \r\n}\r\n#main.inDialog {\r\n    pointer-events: none;\r\n}\r\n.hide {\r\n    display: none;\r\n    max-height: 0;\r\n}\r\n\r\n.dialog {\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    z-index: 10000;\r\n    height: 100%;\r\n    width: 100%;\r\n    background: rgba(12,12,12,0.5);\r\n\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n\r\n    pointer-events: none;\r\n}\r\nform {\r\n    pointer-events: auto;\r\n    z-index: 10001;\r\n    background: white;\r\n    display: flex;\r\n    width: 300px;\r\n    padding: 5px;\r\n    align-items: center;\r\n    justify-content: center;\r\n    text-align: center;\r\n    border-radius: 5px;\r\n}\r\n\r\nform input[type=\"text\"] {\r\n    margin: 0 auto;\r\n    margin-top: 10px;\r\n    margin-bottom: 10px;\r\n    width: 150px;\r\n}\r\n\r\nform .error {\r\n    color: red;\r\n}\r\n\r\nform::after {\r\n    clear: both;\r\n}\r\n\r\n.form-group { \r\n    position: relative;\r\n}\r\n.form-group button {\r\n    margin-top: 10px;\r\n}\r\n#clipboard {\r\n    height: 300px;\r\n    width: 200px;\r\n}\r\n.close {\r\n    line-height: 20px;\r\n    position: absolute;\r\n    right: -32px;\r\n    top: -5px;\r\n    text-align: center;\r\n    width: 20px;\r\n    text-decoration: none;\r\n    font-weight: bold;\r\n    box-shadow: 1px 1px 3px rgba(0,0,0,0.75);\r\n}\r\n\r\n#preloader.active {\r\n    position: fixed;\r\n    top: 0;\r\n    left: 0;\r\n    height: 100vh;\r\n    width: 100vw;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background: #bbd149;\r\n}\r\n\r\n#preloader.active #inner {\r\n    width: 50px;\r\n    height: 50px;\r\n    position: relative;\r\n}\r\n\r\n#preloader.active #inner:before {\r\n    content: '';\r\n    position: absolute;\r\n    top: 67px;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 6px;\r\n    background: black;\r\n    opacity: .2;\r\n    border-radius: 50%;\r\n    animation: shadow .5s linear infinite;\r\n}\r\n\r\n#preloader.active #inner:after {\r\n    content: '';\r\n    position: absolute;\r\n    top: 0;\r\n    left: 0;\r\n    width: 50px;\r\n    height: 50px;\r\n    background: white;\r\n    animation: rotate .5s linear infinite;\r\n    border-radius: 5px;\r\n}\r\n\r\n@keyframes rotate {\r\n    0% {\r\n        transform: translateY(0) rotate(0deg);\r\n    }\r\n    25% {\r\n        transform: translateY(10px) rotate(22.5deg);\r\n    }\r\n    50% {\r\n        transform: translateY(20px) scale(1.1, 0.9) rotate(45deg);\r\n        border-bottom-right-radius: 50px;\r\n    }\r\n    75% {\r\n        transform: translateY(10px) rotate(67.5deg);\r\n    }\r\n    100% {\r\n        transform: translateY(0) rotate(90deg);\r\n    }\r\n}\r\n\r\n@keyframes shadow {\r\n    0%,\r\n    100% {\r\n        transform: scaleX(1);\r\n    }\r\n    50% {\r\n        transform: scaleX(1.2);\r\n    }\r\n}", ""]);
 	
 	// exports
 
@@ -2242,13 +2283,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    },
 	    update: {
-	      value: function update(data) {
-	        this.stand.update(data);
+	      value: function update() {
+	        this.stand.update();
 	      }
 	    },
 	    _getStandArray: {
 	      value: function _getStandArray() {
 	        return this.stand.getAsArray();
+	      }
+	    },
+	    getWires: {
+	      value: function getWires() {
+	        if (this.stand.getWires().length == 0) {
+	          return "Пустой проект";
+	        }return this.stand.getWires().map(function (wire, index) {
+	          return wire.toString();
+	        });
+	      }
+	    },
+	    importWires: {
+	      value: function importWires(wiresArray) {
+	        this.stand.importWires(wiresArray);
 	      }
 	    }
 	  });
@@ -2293,9 +2348,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Capacity = _interopRequire(__webpack_require__(43));
 	
-	var Inductance = _interopRequire(__webpack_require__(45));
+	var Inductance = _interopRequire(__webpack_require__(44));
 	
-	var Current = _interopRequire(__webpack_require__(46));
+	var Current = _interopRequire(__webpack_require__(45));
+	
+	var Wire = _interopRequire(__webpack_require__(37));
 	
 	var Stand = (function (_Stage) {
 	    function Stand() {
@@ -2311,6 +2368,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	        this.panel = new Layer();
 	        this.components = [];
+	        this.wires = [];
+	        this.inputs = [];
 	        this.add(this.panel);
 	    }
 	
@@ -2351,15 +2410,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        update: {
 	            value: function update(data) {
-	                this.panel.destroyChildren();
-	                this.components = [];
-	                this.build(data);
+	                var _iteratorNormalCompletion = true;
+	                var _didIteratorError = false;
+	                var _iteratorError = undefined;
+	
+	                try {
+	                    for (var _iterator = this.wires[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                        var wire = _step.value;
+	
+	                        wire.selfDestroy();
+	                    }
+	                } catch (err) {
+	                    _didIteratorError = true;
+	                    _iteratorError = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion && _iterator["return"]) {
+	                            _iterator["return"]();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError) {
+	                            throw _iteratorError;
+	                        }
+	                    }
+	                }
+	
+	                this.wires = [];
+	            }
+	        },
+	        importWires: {
+	            value: function importWires(wiresArray) {
+	                var _iteratorNormalCompletion = true;
+	                var _didIteratorError = false;
+	                var _iteratorError = undefined;
+	
+	                try {
+	                    for (var _iterator = JSON.parse(wiresArray)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                        var wire = _step.value;
+	
+	                        var s1 = this.components[wire.Side1.id].leftInput.canConnect() ? this.components[wire.Side1.id].leftInput : this.components[wire.Side1.id].rightInput;
+	                        var s2 = this.components[wire.Side2.id].leftInput.canConnect() ? this.components[wire.Side2.id].leftInput : this.components[wire.Side2.id].rightInput;
+	                        var newWire = new Wire([s1.x, s1.y, s2.x, s2.y], this);
+	                        s1.wire = newWire;
+	                        s1.connect(s2, true);
+	                        this.wires.push(newWire);
+	                        this.panel.add(newWire);
+	                    }
+	                } catch (err) {
+	                    _didIteratorError = true;
+	                    _iteratorError = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion && _iterator["return"]) {
+	                            _iterator["return"]();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError) {
+	                            throw _iteratorError;
+	                        }
+	                    }
+	                }
+	
+	                this.add(this.panel);
 	            }
 	        },
 	        addElement: {
 	            value: function addElement(element) {
-	                if (element.type !== "undefined") this.components.push(element);
+	                if (element.type !== "undefined") {
+	                    var id = element._id ? element._id : this.components[this.components.length - 1]._id + 1;
+	                    if (element.type === "Input") {
+	                        this.inputs.push(element);
+	                    } else {
+	                        this.components[id] = element;
+	                    }
+	                }
+	
 	                this.add(this.panel.add(element));
+	
+	                if (element.type === "GroundLine" || element.type === "Frame") {
+	                    element.moveToBottom();
+	                } else {
+	                    element.moveToTop();
+	                }
+	                this.panel.draw();
 	            }
 	        },
 	        addElements: {
@@ -2372,9 +2505,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                        var element = _step.value;
 	
-	                        if (element.type !== "undefined") this.components.push(element);
+	                        if (element.type !== "undefined") {
+	                            var id = element._id ? element._id : this.components[this.components.length - 1]._id + 1;
+	                            if (element.type === "Input") {
+	                                this.inputs.push(element);
+	                            } else {
+	                                this.components[id] = element;
+	                            }
+	                        }
+	
 	                        this.add(this.panel.add(element));
-	                        if (element.type === "GroundLine") element.moveDown();
+	                        if (element.type === "GroundLine" || element.type === "Frame") {
+	                            element.moveToBottom();
+	                        } else {
+	                            element.moveToTop();
+	                        }
+	                        this.panel.draw();
 	                    }
 	                } catch (err) {
 	                    _didIteratorError = true;
@@ -2409,28 +2555,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    elements.push(new Input(el.x, el.y, this));
 	                                    break;
 	                                case "Meter":
-	                                    elements.push(new Meter(el.x, el.y, el.param, this));
+	                                    elements.push(new Meter(el.x, el.y, el.param, this, el.id));
 	                                    break;
 	                                case "Resister":
-	                                    elements.push(new Resister(el.x, el.y, el.value, this));
+	                                    elements.push(new Resister(el.x, el.y, el.value, this, el.id));
 	                                    break;
 	                                case "Picker":
-	                                    elements.push(new Picker(el.x, el.y, el.data, el.param, this));
+	                                    elements.push(new Picker(el.x, el.y, el.data, el.param, this, el.id));
 	                                    break;
 	                                case "GroundLine":
-	                                    elements.push(new GroundLine(this));
+	                                    elements.push(new GroundLine(this, el.id));
 	                                    break;
 	                                case "Frame":
-	                                    elements.push(new Frame(el.x1, el.y1, el.x2, el.y2, this));
+	                                    elements.push(new Frame(el.x1, el.y1, el.x2, el.y2, this, el.id));
 	                                    break;
 	                                case "Capacity":
-	                                    elements.push(new Capacity(el.x, el.y, el.value, this));
+	                                    elements.push(new Capacity(el.x, el.y, el.value, this, el.id));
 	                                    break;
 	                                case "Inductance":
-	                                    elements.push(new Inductance(el.x, el.y, el.value, this));
+	                                    elements.push(new Inductance(el.x, el.y, el.value, this, el.id));
 	                                    break;
 	                                case "Current":
-	                                    elements.push(new Current(el.x, el.y, this));
+	                                    elements.push(new Current(el.x, el.y, this, el.id));
 	                                    break;
 	                            }
 	                        }
@@ -2474,7 +2620,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                type: element.type,
 	                                x: element.x,
 	                                y: element.y,
-	                                connectedInputs: inputs
+	                                connectedInputs: inputs,
+	                                id: element.id
 	                            };
 	                            break;
 	                        case "Meter":
@@ -2559,6 +2706,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                    return el;
 	                });
+	            }
+	        },
+	        getWires: {
+	            value: function getWires() {
+	                return this.wires;
 	            }
 	        }
 	    });
@@ -19001,17 +19153,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _iteratorError = undefined;
 	
 	    try {
-	        for (var _iterator = input.stand.components[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        for (var _iterator = input.stand.inputs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	            var component = _step.value;
 	
-	            if (component.type === "Input") {
-	                if (component.connectedInputs.length < 2) {
-	                    if (parseInt(component.x) + 8 >= x && parseInt(component.x) - 8 <= x && parseInt(component.y) + 8 >= y && parseInt(component.y) - 8 <= y) {
-	                        return {
-	                            result: true,
-	                            input: component
-	                        };
-	                    }
+	            if (component.connectedInputs.length < 2) {
+	                if (parseInt(component.x) + 8 >= x && parseInt(component.x) - 8 <= x && parseInt(component.y) + 8 >= y && parseInt(component.y) - 8 <= y) {
+	                    return {
+	                        result: true,
+	                        input: component
+	                    };
 	                }
 	            }
 	        }
@@ -19059,6 +19209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var owner = arguments[3] === undefined ? null : arguments[3];
 	        var scale = arguments[4] === undefined ? 1 : arguments[4];
 	        var fill = arguments[5] === undefined ? "rgba(12,12,12,0.2)" : arguments[5];
+	        var id = arguments[6] === undefined ? -1 : arguments[6];
 	
 	        _classCallCheck(this, Input);
 	
@@ -19080,17 +19231,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.type = "Input";
 	        this.pointer = null;
 	        this.owner = owner;
-	        this._id = Math.floor(Math.random() * 1000);
+	        this._id = this.owner._id;
 	
 	        /* handlers */
 	        this.on("mouseover", function () {
 	            document.body.style.cursor = "pointer";
 	
-	            if (_this.connectedInputs.length < 2 && _this.pointer !== null) {
+	            if (_this.canConnect() && _this.pointer !== null) {
 	                _this.pointer.destroy();
 	                _this.pointer = null;
 	            }
-	            if (_this.connectedInputs.length < 2 && _this.pointer === null) {
+	            if (_this.canConnect() && _this.pointer === null) {
 	                _this.pointer = new Circle({
 	                    x: _this.x,
 	                    y: _this.y,
@@ -19099,7 +19250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	                _this.stand.addElement(_this.pointer);
 	                _this.pointer.on("dragstart", function () {
-	                    _this.wire = new Wire([_this.x, _this.y]);
+	                    _this.wire = new Wire([_this.x, _this.y], _this.stand);
 	                    _this.stand.addElement(_this.wire);
 	                    _this.connecting = true;
 	                });
@@ -19124,22 +19275,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(Input, {
 	        connect: {
 	            value: function connect(input) {
+	                var isImport = arguments[1] === undefined ? false : arguments[1];
+	
 	                this.wire.points([this.x, this.y, input.x, input.y]);
 	                this.wire.setSides(this, input);
 	                this.connectedInputs.push(input);
 	                input.connectedInputs.push(this);
-	                if (input.connectedInputs.length === 2) {
-	                    input.pointer.destroy();
-	                }
-	                this.connecting = false;
-	                this.pointer.destroy();
-	                this.pointer = null;
-	                this.stand.panel.draw();
 	
-	                console.log("this.owner.type === " + this.owner.type);
-	                console.log("input.type === " + input.type);
+	                if (!isImport) {
+	                    if (input.connectedInputs.length === 2) {
+	                        input.pointer.destroy();
+	                    }
+	                    this.connecting = false;
+	                    this.pointer.destroy();
+	                    this.pointer = null;
+	                    this.stand.panel.draw();
+	
+	                    this.stand.wires.push(this.wire);
+	                }
+	
 	                if (this.owner !== null && this.owner.type === "Meter") this.owner.check();
 	                if (input.owner !== null && input.owner.type === "Meter") input.owner.check();
+	            }
+	        },
+	        canConnect: {
+	            value: function canConnect() {
+	                return this.connectedInputs.length < 2;
 	            }
 	        },
 	        disconnect: {
@@ -19153,6 +19314,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                this.pointer = null;
 	                this.wire = null;
+	            }
+	        },
+	        toString: {
+	            value: function toString() {
+	                return "{ " + this.owner.toString() + " }";
 	            }
 	        }
 	    });
@@ -19179,7 +19345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Line = __webpack_require__(33).Line;
 	
 	var Wire = (function (_Line) {
-	    function Wire(points) {
+	    function Wire(points, stand) {
 	        var _this = this;
 	
 	        _classCallCheck(this, Wire);
@@ -19192,28 +19358,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        /* parameters */
 	        this.type = "Wire";
+	        this.stand = stand;
 	        this.sideOne = null;
 	        this.sideTwo = null;
-	        this._id = Math.floor(Math.random() * 1000);
 	
 	        /* handlers */
 	        this.on("dblclick", function () {
 	            console.log("delete wire");
-	            _this.sideOne.stand.panel.draw();
-	            _this.sideOne.disconnect(_this);
-	            _this.sideTwo.disconnect(_this);
-	            _this.destroy();
-	            _this.sideOne.stand.panel.draw();
+	            _this.selfDestroy();
 	        });
 	    }
 	
 	    _inherits(Wire, _Line);
 	
 	    _createClass(Wire, {
+	        selfDestroy: {
+	            value: function selfDestroy() {
+	                this.sideOne.stand.panel.draw();
+	                this.sideOne.disconnect(this);
+	                this.sideTwo.disconnect(this);
+	                this.destroy();
+	                this.sideOne.stand.panel.draw();
+	            }
+	        },
 	        setSides: {
 	            value: function setSides(inputOne, inputTwo) {
 	                this.sideOne = inputOne;
 	                this.sideTwo = inputTwo;
+	            }
+	        },
+	        toString: {
+	            value: function toString() {
+	                return "{ \"Side1\": " + this.sideOne.toString() + ", \"Side2\": " + this.sideTwo.toString() + " }";
 	            }
 	        }
 	    });
@@ -19250,6 +19426,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Meter = (function (_Rect) {
 	    function Meter(x, y, param, stand) {
+	        var id = arguments[4] === undefined ? -1 : arguments[4];
+	
 	        _classCallCheck(this, Meter);
 	
 	        _get(Object.getPrototypeOf(Meter.prototype), "constructor", this).call(this, {
@@ -19269,9 +19447,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.stand = stand;
 	        this.x = this.attrs.x;
 	        this.y = this.attrs.y;
-	        this._id = Math.floor(Math.random() * 1000);
-	        this.inputOne = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
-	        this.inputTwo = new Input(this.x + 35, parseInt(this.y) + 6.25, this.stand, this);
+	        this._id = id;
+	        this.leftInput = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
+	        this.rightInput = new Input(this.x + 35, parseInt(this.y) + 6.25, this.stand, this);
 	        this.display = new Label({
 	            x: this.x,
 	            y: this.y });
@@ -19293,7 +19471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            stroke: "black",
 	            strokeWidth: 1
 	        });
-	        this.stand.addElements([this.inputOne, this.inputTwo, this.display, this.lineToI_1, this.lineToI_2]);
+	        this.stand.addElements([this.leftInput, this.rightInput, this.display, this.lineToI_1, this.lineToI_2]);
 	        /* handlers */
 	    }
 	
@@ -19310,6 +19488,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                console.log("CHECK METER");
 	                console.log(this.stand);
 	            }
+	        },
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
 	        }
 	    });
 	
@@ -19325,6 +19508,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
@@ -19343,6 +19528,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Resister = (function (_Rect) {
 	    function Resister(x, y, val, stand) {
+	        var id = arguments[4] === undefined ? -1 : arguments[4];
+	
 	        _classCallCheck(this, Resister);
 	
 	        _get(Object.getPrototypeOf(Resister.prototype), "constructor", this).call(this, {
@@ -19362,9 +19549,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.val = val;
 	        this.value = "" + this.val + " Om";
 	        this.stand = stand;
-	        this._id = Math.floor(Math.random() * 1000);
-	        this.inputOne = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
-	        this.inputTwo = new Input(this.x + 50, parseInt(this.y) + 6.25, this.stand, this);
+	        this._id = id;
+	        this.leftInput = new Input(this.x - 10, parseInt(this.y) + 6.25, this.stand, this);
+	        this.rightInput = new Input(this.x + 50, parseInt(this.y) + 6.25, this.stand, this);
 	        this.lineToI_1 = new Line({
 	            points: [parseInt(this.x), parseInt(this.y) + 6.25, parseInt(this.x) - 6, parseInt(this.y) + 6.25],
 	            stroke: "black",
@@ -19386,11 +19573,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            padding: 2,
 	            fill: "black"
 	        }));
-	        this.stand.addElements([this.inputOne, this.inputTwo, this.display, this.lineToI_1, this.lineToI_2]);
+	        this.stand.addElements([this.leftInput, this.rightInput, this.display, this.lineToI_1, this.lineToI_2]);
 	        /* handlers */
 	    }
 	
 	    _inherits(Resister, _Rect);
+	
+	    _createClass(Resister, {
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
+	        }
+	    });
 	
 	    return Resister;
 	})(Rect);
@@ -19425,6 +19620,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Picker = (function (_Circle) {
 	    function Picker(x, y, data, param, stand) {
+	        var id = arguments[5] === undefined ? -1 : arguments[5];
+	
 	        _classCallCheck(this, Picker);
 	
 	        _get(Object.getPrototypeOf(Picker.prototype), "constructor", this).call(this, {
@@ -19437,8 +19634,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	
 	        /* parameters */
+	        this.type = "Picker";
 	        this.x = this.attrs.x;
 	        this.y = this.attrs.y;
+	
+	        this._id = id;
 	
 	        this.background = new Rect({
 	            x: this.x - 20,
@@ -19475,8 +19675,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.updateState();
 	        this._id = Math.floor(Math.random() * 1000);
 	
-	        this.inputOne = new Input(this.x - 30, parseInt(this.y) - 5, this.stand, this);
-	        this.inputTwo = new Input(this.x + 30, parseInt(this.y) - 5, this.stand, this);
+	        this.leftInput = new Input(this.x - 30, parseInt(this.y) - 5, this.stand, this);
+	        this.rightInput = new Input(this.x + 30, parseInt(this.y) - 5, this.stand, this);
 	        this.lineToI_1 = new Line({
 	            points: [parseInt(this.x) - 20, parseInt(this.y) - 5, parseInt(this.x) - 26, parseInt(this.y) - 5],
 	            stroke: "black",
@@ -19488,7 +19688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            strokeWidth: 1
 	        });
 	
-	        this.stand.addElements([this.pointer, this.background, this.display, this.inputOne, this.inputTwo, this.lineToI_1, this.lineToI_2]);
+	        this.stand.addElements([this.pointer, this.background, this.display, this.leftInput, this.rightInput, this.lineToI_1, this.lineToI_2]);
 	
 	        /* handlers */
 	        this.on("click", this.clickHandler.bind(this));
@@ -19528,6 +19728,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	                return states;
 	            }
+	        },
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
 	        }
 	    });
 	
@@ -19543,6 +19748,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
@@ -19563,6 +19770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var GroundLine = (function (_Line) {
 	    function GroundLine(stand) {
+	        var id = arguments[1] === undefined ? -1 : arguments[1];
+	
 	        _classCallCheck(this, GroundLine);
 	
 	        _get(Object.getPrototypeOf(GroundLine.prototype), "constructor", this).call(this, {
@@ -19575,6 +19784,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.type = "GroundLine";
 	        this.stand = stand;
 	        this.connections = [];
+	        this._id = id;
+	
 	        this.x = 30;
 	        this.y = 340;
 	        this.connections.push(new Input(this.x + 20, this.y, this.stand, this, 1.5, "rgba(12,12,12,0.6)"));
@@ -19594,6 +19805,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    _inherits(GroundLine, _Line);
+	
+	    _createClass(GroundLine, {
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
+	        }
+	    });
 	
 	    return GroundLine;
 	})(Line);
@@ -19650,6 +19869,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
 	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
@@ -19667,6 +19888,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Capacity = (function (_Shape) {
 	    function Capacity(x, y, value, stand) {
+	        var id = arguments[4] === undefined ? -1 : arguments[4];
+	
 	        _classCallCheck(this, Capacity);
 	
 	        _get(Object.getPrototypeOf(Capacity.prototype), "constructor", this).call(this);
@@ -19678,6 +19901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.y = y;
 	        this.value = " " + value + " \n нФ";
 	
+	        this._id = id;
 	        this.leftSide = new Line({
 	            points: [this.x - 6, this.y, this.x + 8, this.y, this.x + 8, this.y - 10, this.x + 8, this.y + 10],
 	            stroke: "black",
@@ -19688,8 +19912,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            stroke: "black",
 	            strokeWidth: 2
 	        });
-	        this.leftInput = new Input(this.x - 10, this.y, this.stand);
-	        this.rightInput = new Input(this.x + 50, this.y, this.stand);
+	        this.leftInput = new Input(this.x - 10, this.y, this.stand, this);
+	        this.rightInput = new Input(this.x + 50, this.y, this.stand, this);
 	
 	        this.display = new Label({
 	            x: this.x + 9,
@@ -19707,6 +19931,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _inherits(Capacity, _Shape);
 	
+	    _createClass(Capacity, {
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
+	        }
+	    });
+	
 	    return Capacity;
 	})(Shape);
 	
@@ -19714,253 +19946,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 44 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	var labs = {
-	    Lab_1: {
-	        doc: "http://yanko.lib.ru/books/philosoph/mgu-ist_filosofii-2005-8l.pdf",
-	        stand: [{
-	            type: "Frame",
-	            x1: 35, y1: 10,
-	            x2: 322, y2: 50 }, {
-	            type: "Meter",
-	            x: 60,
-	            y: 25,
-	            param: "A"
-	        }, {
-	            type: "Meter",
-	            x: 130,
-	            y: 25,
-	            param: "A"
-	        }, {
-	            type: "Meter",
-	            x: 200,
-	            y: 25,
-	            param: "A"
-	        }, {
-	            type: "Meter",
-	            x: 270,
-	            y: 25,
-	            param: "A"
-	        }, {
-	            type: "Frame",
-	            x1: 330, y1: 10,
-	            x2: 610, y2: 50 }, {
-	            type: "Meter",
-	            x: 350,
-	            y: 25,
-	            param: "V"
-	        }, {
-	            type: "Meter",
-	            x: 420,
-	            y: 25,
-	            param: "V"
-	        }, {
-	            type: "Meter",
-	            x: 490,
-	            y: 25,
-	            param: "V"
-	        }, {
-	            type: "Meter",
-	            x: 560,
-	            y: 25,
-	            param: "V"
-	        }, {
-	            type: "Frame",
-	            x1: 105,
-	            y1: 85,
-	            x2: 195,
-	            y2: 325 }, {
-	            type: "Resister",
-	            x: 130,
-	            y: 100,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 130,
-	            y: 150,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 130,
-	            y: 200,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 130,
-	            y: 250,
-	            value: "10"
-	        }, {
-	            type: "Picker",
-	            x: 150,
-	            y: 300,
-	            data: ["0", "100", "200", "300", "400", "500"],
-	            param: "Om"
-	        }, {
-	            type: "Frame",
-	            x1: 265,
-	            y1: 85,
-	            x2: 355,
-	            y2: 325 }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 100,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 140,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 180,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 220,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 260,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 290,
-	            y: 300,
-	            value: "10"
-	        }, {
-	            type: "Frame",
-	            x1: 425,
-	            y1: 85,
-	            x2: 515,
-	            y2: 325
-	        }, {
-	            type: "Resister",
-	            x: 450,
-	            y: 100,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 450,
-	            y: 150,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 450,
-	            y: 200,
-	            value: "10"
-	        }, {
-	            type: "Resister",
-	            x: 450,
-	            y: 250,
-	            value: "10"
-	        }, {
-	            type: "Picker",
-	            x: 470,
-	            y: 300,
-	            data: ["0", "100", "200", "300", "400", "500"],
-	            param: "Om"
-	        }, {
-	            type: "GroundLine" }, {
-	            type: "Frame",
-	            x1: 185,
-	            y1: 360,
-	            x2: 275,
-	            y2: 520 }, {
-	            type: "Capacity",
-	            x: 210,
-	            y: 380,
-	            value: "10"
-	        }, {
-	            type: "Capacity",
-	            x: 210,
-	            y: 420,
-	            value: "22"
-	        }, {
-	            type: "Capacity",
-	            x: 210,
-	            y: 460,
-	            value: "100"
-	        }, {
-	            type: "Capacity",
-	            x: 210,
-	            y: 500,
-	            value: "1000"
-	        }, {
-	            type: "Frame",
-	            x1: 345,
-	            y1: 360,
-	            x2: 435,
-	            y2: 485 }, {
-	            type: "Inductance",
-	            x: 370,
-	            y: 380,
-	            value: "470 мк"
-	        }, {
-	            type: "Inductance",
-	            x: 370,
-	            y: 420,
-	            value: "1 м"
-	        }, {
-	            type: "Inductance",
-	            x: 370,
-	            y: 460,
-	            value: "10 м"
-	        } /*,
-	          {
-	             type: 'Current',
-	             x: 50,
-	             y: 250
-	          }*/
-	        ]
-	    },
-	    Lab_2: {
-	        doc: "http://www.en2.ru/download/bonk.pdf",
-	        stand: [{
-	            type: "Input",
-	            x: "250",
-	            y: "50"
-	        }, {
-	            type: "Input",
-	            x: "150",
-	            y: "150"
-	        }, {
-	            type: "Input",
-	            x: "50",
-	            y: "250"
-	        }, {
-	            type: "Meter",
-	            param: "A",
-	            x: "300",
-	            y: "300"
-	        }, {
-	            type: "Meter",
-	            param: "V",
-	            x: "100",
-	            y: "300"
-	        }, {
-	            type: "Resister",
-	            value: "200",
-	            x: "100",
-	            y: "400"
-	        }]
-	    }
-	};
-	
-	module.exports = labs;
-
-/***/ },
-/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
@@ -19980,6 +19972,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var Inductance = (function (_Shape) {
 	    function Inductance(x, y, value, stand) {
+	        var id = arguments[4] === undefined ? -1 : arguments[4];
+	
 	        _classCallCheck(this, Inductance);
 	
 	        _get(Object.getPrototypeOf(Inductance.prototype), "constructor", this).call(this);
@@ -19991,6 +19985,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.y = y;
 	        this.value = " " + value + "Гн";
 	
+	        this._id = id;
 	        this.leftSide = new Line({
 	            points: [this.x - 6, this.y, this.x + 5, this.y],
 	            stroke: "black",
@@ -20001,8 +19996,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            stroke: "black",
 	            strokeWidth: 2
 	        });
-	        this.leftInput = new Input(this.x - 10, this.y, this.stand);
-	        this.rightInput = new Input(this.x + 50, this.y, this.stand);
+	        this.leftInput = new Input(this.x - 10, this.y, this.stand, this);
+	        this.rightInput = new Input(this.x + 50, this.y, this.stand, this);
 	
 	        var arc1 = new Arc({
 	            x: this.x + 9,
@@ -20058,18 +20053,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _inherits(Inductance, _Shape);
 	
+	    _createClass(Inductance, {
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
+	        }
+	    });
+	
 	    return Inductance;
 	})(Shape);
 	
 	module.exports = Inductance;
 
 /***/ },
-/* 46 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
 	var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
@@ -20089,6 +20094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var owner = arguments[3] === undefined ? null : arguments[3];
 	        var scale = arguments[4] === undefined ? 1 : arguments[4];
 	        var fill = arguments[5] === undefined ? "rgba(12,12,12,0.2)" : arguments[5];
+	        var id = arguments[6] === undefined ? -1 : arguments[6];
 	
 	        _classCallCheck(this, Current);
 	
@@ -20101,7 +20107,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /* parameters */
 	        this.type = "Current";
 	        this.stand = stand;
+	        this.connectedInputs = [];
 	
+	        this._id = id;
 	        this.display = new Label({
 	            x: x - 20,
 	            y: y });
@@ -20119,10 +20127,266 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _inherits(Current, _Input);
 	
+	    _createClass(Current, {
+	        toString: {
+	            value: function toString() {
+	                return "\"type\": \"" + this.type + "\", \"id\": " + this._id;
+	            }
+	        }
+	    });
+	
 	    return Current;
 	})(Input);
 	
 	module.exports = Current;
+
+/***/ },
+/* 46 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var labs = {
+	    Lab_1: "https://www.hse.ru/data/2016/08/29/1117078475/program-759594905-4drMfc7_ol.pdf",
+	    Lab_2: "https://www.hse.ru/data/2016/08/29/1117079540/program-725259066-CaQmi7ZE58.pdf",
+	    Lab_3: "https://www.hse.ru/data/2016/08/29/1117084955/program-759594951-nHFUmwRroq.pdf"
+	};
+	
+	module.exports = labs;
+
+/***/ },
+/* 47 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var stand = {
+	    stand: [{
+	        type: "Frame",
+	        x1: 35, y1: 10,
+	        x2: 322, y2: 50 }, {
+	        type: "Meter",
+	        x: 60,
+	        y: 25,
+	        param: "A",
+	        id: 1
+	    }, {
+	        type: "Meter",
+	        x: 130,
+	        y: 25,
+	        param: "A",
+	        id: 2
+	    }, {
+	        type: "Meter",
+	        x: 200,
+	        y: 25,
+	        param: "A",
+	        id: 3
+	    }, {
+	        type: "Meter",
+	        x: 270,
+	        y: 25,
+	        param: "A",
+	        id: 4
+	    }, {
+	        type: "Frame",
+	        x1: 330, y1: 10,
+	        x2: 610, y2: 50 }, {
+	        type: "Meter",
+	        x: 350,
+	        y: 25,
+	        param: "V",
+	        id: 5
+	    }, {
+	        type: "Meter",
+	        x: 420,
+	        y: 25,
+	        param: "V",
+	        id: 6
+	    }, {
+	        type: "Meter",
+	        x: 490,
+	        y: 25,
+	        param: "V",
+	        id: 7
+	    }, {
+	        type: "Meter",
+	        x: 560,
+	        y: 25,
+	        param: "V",
+	        id: 8
+	    }, {
+	        type: "Frame",
+	        x1: 105,
+	        y1: 85,
+	        x2: 195,
+	        y2: 325
+	    }, {
+	        type: "Resister",
+	        x: 130,
+	        y: 100,
+	        value: "10",
+	        id: 9
+	    }, {
+	        type: "Resister",
+	        x: 130,
+	        y: 150,
+	        value: "10",
+	        id: 10
+	    }, {
+	        type: "Resister",
+	        x: 130,
+	        y: 200,
+	        value: "10",
+	        id: 11
+	    }, {
+	        type: "Resister",
+	        x: 130,
+	        y: 250,
+	        value: "10",
+	        id: 12
+	    }, {
+	        type: "Picker",
+	        x: 150,
+	        y: 300,
+	        data: ["0", "100", "200", "300", "400", "500"],
+	        param: "Om",
+	        id: 12
+	    }, {
+	        type: "Frame",
+	        x1: 265,
+	        y1: 85,
+	        x2: 355,
+	        y2: 325 }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 100,
+	        value: "10",
+	        id: 13
+	    }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 140,
+	        value: "10",
+	        id: 14
+	    }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 180,
+	        value: "10",
+	        id: 15
+	    }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 220,
+	        value: "10",
+	        id: 16
+	    }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 260,
+	        value: "10",
+	        id: 17
+	    }, {
+	        type: "Resister",
+	        x: 290,
+	        y: 300,
+	        value: "10",
+	        id: 18
+	    }, {
+	        type: "Frame",
+	        x1: 425,
+	        y1: 85,
+	        x2: 515,
+	        y2: 325
+	    }, {
+	        type: "Resister",
+	        x: 450,
+	        y: 100,
+	        value: "10",
+	        id: 19
+	    }, {
+	        type: "Resister",
+	        x: 450,
+	        y: 150,
+	        value: "10",
+	        id: 20
+	    }, {
+	        type: "Resister",
+	        x: 450,
+	        y: 200,
+	        value: "10",
+	        id: 21
+	    }, {
+	        type: "Resister",
+	        x: 450,
+	        y: 250,
+	        value: "10",
+	        id: 22
+	    }, {
+	        type: "Picker",
+	        x: 470,
+	        y: 300,
+	        data: ["0", "100", "200", "300", "400", "500"],
+	        param: "Om",
+	        id: 23
+	    }, {
+	        type: "GroundLine" }, {
+	        type: "Frame",
+	        x1: 185,
+	        y1: 360,
+	        x2: 275,
+	        y2: 520 }, {
+	        type: "Capacity",
+	        x: 210,
+	        y: 380,
+	        value: "10",
+	        id: 24
+	    }, {
+	        type: "Capacity",
+	        x: 210,
+	        y: 420,
+	        value: "22",
+	        id: 25
+	    }, {
+	        type: "Capacity",
+	        x: 210,
+	        y: 460,
+	        value: "100",
+	        id: 26
+	    }, {
+	        type: "Capacity",
+	        x: 210,
+	        y: 500,
+	        value: "1000",
+	        id: 27
+	    }, {
+	        type: "Frame",
+	        x1: 345,
+	        y1: 360,
+	        x2: 435,
+	        y2: 485 }, {
+	        type: "Inductance",
+	        x: 370,
+	        y: 380,
+	        value: "470 мк",
+	        id: 28
+	    }, {
+	        type: "Inductance",
+	        x: 370,
+	        y: 420,
+	        value: "1 м",
+	        id: 29
+	    }, {
+	        type: "Inductance",
+	        x: 370,
+	        y: 460,
+	        value: "10 м",
+	        id: 30
+	    }]
+	};
+	
+	module.exports = stand;
 
 /***/ }
 /******/ ])
